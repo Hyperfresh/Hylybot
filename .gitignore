@@ -1,3 +1,7 @@
+# Typescript Builds
+build/
+.dccache
+
 # Logs
 logs
 *.log
