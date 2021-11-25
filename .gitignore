@@ -2,6 +2,9 @@
 build/
 .dccache
 
+# Sensitive data...
+data/
+
 # Logs
 logs
 *.log
