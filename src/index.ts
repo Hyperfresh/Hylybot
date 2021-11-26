@@ -14,62 +14,91 @@ See the GNU Affero General Public License for more details.
 
 You should have received a copy of the GNU Affero General Public License
 along with this program. If not, see <https://www.gnu.org/licenses/>.
-`)
+`);
 
-console.log(copy)
+console.log(copy);
 
 if (!/^(v([1-9][6-9]+\.)?(\d+\.)?(\d+))$/.test(process.version)) {
-    throw new Error(`Hylybot and its key repository Discord.js requires Node v16.x or higher to run. You have ${process}.\nPlease upgrade your Node installation.`)
+  throw new Error(
+    `Hylybot and its key repository Discord.js requires Node v16.x or higher to run. You have ${process}.\nPlease upgrade your Node installation.`
+  );
 }
 
 import * as Discord from "discord.js";
-const bot: Discord.Client = new Discord.Client({retryLimit: 5, intents: [Discord.Intents.FLAGS.GUILDS, Discord.Intents.FLAGS.GUILD_MESSAGES,
-    Discord.Intents.FLAGS.GUILD_VOICE_STATES, Discord.Intents.FLAGS.GUILD_MESSAGE_REACTIONS]})
+const bot: Discord.Client = new Discord.Client({
+  retryLimit: 5,
+  intents: [
+    Discord.Intents.FLAGS.GUILDS,
+    Discord.Intents.FLAGS.GUILD_MESSAGES,
+    Discord.Intents.FLAGS.GUILD_VOICE_STATES,
+    Discord.Intents.FLAGS.GUILD_MESSAGE_REACTIONS,
+  ],
+});
 const commands: Discord.Collection<any, any> = new Discord.Collection();
 
-let config = require("../data/config")
+let config = require("../data/config");
 
-import * as fs from "fs"
+import * as fs from "fs";
 
-import ready from "./events/ready"
+import ready from "./events/ready";
 
-fs.readdir('./build/commands/', { withFileTypes: true }, (error, f) => {
-    if (error) return console.error(error);
-    f.forEach((f) => {
-        if (f.isDirectory()) {
-            fs.readdir(`./build/commands/${f.name}/`, (error, fi) => {
-                if (error) return console.error(error);
-                fi.forEach((fi) => {
-                    if (!fi.endsWith(".js")) return;
-                    let commande = require(`./commands/${f.name}/${fi}`);
-                    commands.set(commande.help.name, commande);
-                })
-            })
-        } else {
-            if (!f.name.endsWith(".js")) return;
-            let commande = require(`./commands/${f.name}`);
-            commands.set(commande.help.name, commande);
-        }
+import { REST } from "@discordjs/rest";
+import { Routes } from "discord-api-types/v9";
+
+let commandsToPush = [];
+
+fs.readdir("./build/commands/", { withFileTypes: true }, (error, f) => {
+  if (error) return console.error(error);
+  f.forEach((f) => {
+    if (f.isDirectory()) {
+      fs.readdir(`./build/commands/${f.name}/`, (error, fi) => {
+        if (error) return console.error(error);
+        fi.forEach((fi) => {
+          if (!fi.endsWith(".js")) return;
+          let commande = require(`./commands/${f.name}/${fi}`);
+          commands.set(commande.help.name, commande);
+          commandsToPush.push(commande.run.data.toJSON());
+          console.log(`Loaded ${f.name}/${fi}.`);
+        });
+      });
+    } else {
+      if (!f.name.endsWith(".js")) return;
+      let commande = require(`./commands/${f.name}`);
+      commands.set(commande.help.name, commande);
+      commandsToPush.push(commande.run.data.toJSON());
+      console.log(`Loaded ${f.name}.`);
+    }
+  });
+});
+
+bot.on("shardReady", async () => {
+  const rest = new REST({ version: "9" }).setToken(config.BOT_TOKEN);
+  rest
+    .put(Routes.applicationGuildCommands(config.CLIENT_ID, config.GUILD_ID), {
+      body: commandsToPush,
+    })
+    .then(() => console.log("Pushed commands."))
+    .catch(console.error);
+
+  console.log(`✅ > ${bot.user.username} is ready for action!`);
+  ready(bot);
+});
+
+bot.on("interactionCreate", (interaction) => {
+  if (!interaction.isCommand()) return;
+  const command = commands.get(interaction.commandName);
+
+  if (!command) return;
+
+  try {
+    command.run.execute(interaction);
+  } catch (error) {
+    console.error(error);
+    interaction.reply({
+      content: `There was an error while executing this command! \`${error}\``,
+      ephemeral: true,
     });
+  }
 });
 
-bot.on('shardReady', async () => {
-    console.log(`✅ > ${bot.user.username} is ready for action!`);
-    ready(bot)
-});
-
-bot.on('interactionCreate', interaction => {
-    if (!interaction.isCommand()) return
-    const command = commands.get(interaction.commandName);
-
-	if (!command) return;
-
-	try {
-		command.run.execute(interaction);
-	} catch (error) {
-		console.error(error);
-		interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
-	}
-})
-
-bot.login(config.BOT_TOKEN)
+bot.login(config.BOT_TOKEN);
