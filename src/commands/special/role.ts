@@ -157,9 +157,8 @@ module.exports.run = {
             },
           })
           .then((role) => {
-            db.collection("roles").insertOne(String(interaction.user.id), {
-              role: String(role.id),
-            });
+            const data = {_id: String(interaction.user.id), role: String(role.id)}
+            db.collection("roles").insertOne(data)
             interaction.member.roles.add(role.id);
             interaction.editReply(
               `Your custom role was created: <@&${role.id}>`
