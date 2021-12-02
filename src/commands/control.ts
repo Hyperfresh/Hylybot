@@ -30,8 +30,8 @@ module.exports.run = {
     }
     switch (interaction.options.getString("command")) {
       case "stop":
-        interaction.reply("🛑 > Shutting down.");
-        interaction.bot.user.setStatus("invisible");
+        await interaction.reply("🛑 > Shutting down.");
+        await interaction.client.user.setStatus("invisible");
         setTimeout(() => {
           interaction.client.destroy();
           process.exit();

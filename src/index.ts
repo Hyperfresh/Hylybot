@@ -40,6 +40,10 @@ let config = require("../data/config");
 
 import * as fs from "fs";
 
+import { MongoClient } from "mongodb";
+const url = config.MONGO_URL,
+  dbName = config.MONGO_DBNAME;
+
 import ready from "./events/ready";
 
 import { REST } from "@discordjs/rest";
@@ -84,20 +88,32 @@ bot.on("shardReady", async () => {
   ready(bot);
 });
 
-bot.on("interactionCreate", (interaction) => {
-  if (!interaction.isCommand()) return;
-  const command = commands.get(interaction.commandName);
+bot.on("interactionCreate", async (interaction) => {
+  let mongod = await MongoClient.connect(url);
+  let db = mongod.db(dbName);
 
-  if (!command) return;
+  if (interaction.isButton()) {
+    if (
+      interaction.customId == "preCol" ||
+      interaction.customId == "reassign"
+    ) {
+      let command = commands.get("role");
+      command.run.execute(interaction, db);
+    }
+  }
+  if (interaction.isCommand()) {
+    const command = commands.get(interaction.commandName);
+    if (!command) return;
 
-  try {
-    command.run.execute(interaction);
-  } catch (error) {
-    console.error(error);
-    interaction.reply({
-      content: `There was an error while executing this command! \`${error}\``,
-      ephemeral: true,
-    });
+    try {
+      command.run.execute(interaction, db);
+    } catch (error) {
+      console.error(error);
+      interaction.reply({
+        content: `There was an error while executing this command! \`${error}\``,
+        ephemeral: true,
+      });
+    }
   }
 });
 
