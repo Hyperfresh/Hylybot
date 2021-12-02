@@ -1,5 +1,6 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
 import { MessageEmbed } from "discord.js";
+import { DateTime } from "luxon";
 
 const config = require("../../../data/config");
 
@@ -35,6 +36,25 @@ module.exports.run = {
     ),
   async execute(interaction, db) {
     await interaction.deferReply();
+
+    let search = await db
+      .collection("currencies")
+      .findOne({_id: "61a84588813893d4c48889c0"})
+    if (Number(search.timestamp) + 10800 >= DateTime.now().toMillis()) {
+      oxr.latest(() => {
+        const update = {
+          rates: oxr.rates,
+          base: oxr.base,
+          timestamp: String(oxr.timestamp),
+        };
+        db.collection("currencies").replaceOne(
+          { _id: "61a84588813893d4c48889c0" },
+          update
+        );
+        console.log("Currency rates updated");
+      });
+    }
+
     let value = interaction.options.getNumber("value").toFixed(2);
     let convertFrom = interaction.options
       .getString("convert_from")
@@ -45,23 +65,22 @@ module.exports.run = {
       if (!convertTo) {
         convertTo = "aud";
       }
-      oxr.latest(() => {
-        fx.rates = oxr.rates;
-        fx.base = oxr.base;
-        result = fx.convert(value, {
-          from: convertFrom,
-          to: convertTo.toUpperCase(),
-        });
-        let embed = new MessageEmbed()
+      console.log(search)
+      fx.rates = search.rates;
+      fx.base = search.base;
+      result = fx.convert(value, {
+        from: convertFrom,
+        to: convertTo.toUpperCase(),
+      });
+      let embed = new MessageEmbed()
         .setAuthor(`${value} ${convertFrom} is`)
         .setTitle(`-> ${result.toFixed(2)} ${convertTo.toUpperCase()}`)
         .setDescription(
           "Rates are from [Open Exchange Rates](https://openexchangerates.org)."
         )
         .setFooter("Rates last updated")
-        .setTimestamp(oxr.timestamp);
-       interaction.editReply({ embeds: [embed] });
-      });
+        .setTimestamp(Number(search.timestamp));
+      interaction.editReply({ embeds: [embed] });
     } catch (err) {
       interaction.editReply({
         content: `An error occurred: \`\`\`${err}\`\`\``,
