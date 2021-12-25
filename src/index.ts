@@ -85,12 +85,14 @@ bot.on("shardReady", async () => {
     .catch(console.error);
 
   console.log(`✅ > ${bot.user.username} is ready for action!`);
-  ready(bot);
+  ready(bot, config.DEV_MODE);
 });
 
 bot.on("interactionCreate", async (interaction) => {
   let mongod = await MongoClient.connect(url);
   let db = mongod.db(dbName);
+
+  if (config.DEV_MODE && !config.OWNER_ID.includes(interaction.user.id)) return
 
   if (interaction.isButton()) {
     if (
@@ -116,5 +118,8 @@ bot.on("interactionCreate", async (interaction) => {
     }
   }
 });
+
+// import OzAlertFetch from "./loops/ozalert"
+// setInterval(async () => await OzAlertFetch(bot), 60000)
 
 bot.login(config.BOT_TOKEN);
