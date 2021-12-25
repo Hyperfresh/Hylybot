@@ -12,9 +12,16 @@ import { Client } from "discord.js";
  * - Sets up the cache required for reaction roles and whatnot.
  * - Sets up required commands as part of the new Discord Slash Command protocol.
  * @param {Client} bot - Discord client object.
+ * @param dev - Boot up the bot in Developer mode.
  */
 
-export default async function ready(bot: Client) {
+export default async function ready(bot: Client, dev: boolean) {
+  if (dev) {
+    bot.user.setActivity("to Hy's commands", {type: "LISTENING"})
+    bot.user.setStatus("dnd")
+    console.warn("Developer Mode is active!")
+    return
+  }
   bot.user.setActivity("for /", { type: "WATCHING" });
   bot.user.setStatus("online");
 }

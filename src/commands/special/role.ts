@@ -88,7 +88,6 @@ module.exports.run = {
     ),
   async execute(interaction, db) {
     if (interaction.isButton()) {
-      console.log("Button pressed")
       await interaction.deferUpdate()
       if (interaction.customId == "preCol") {
         let response = [];
@@ -101,7 +100,6 @@ module.exports.run = {
         .collection("roles")
         .findOne({ _id: interaction.user.id });
         await interaction.member.roles.add(reassign.role);
-        console.log(reassignButton.components)
         await interaction.editReply({content: `Your role was reassigned: <@&${reassign.role}>`})
       }
       return;
@@ -136,7 +134,7 @@ module.exports.run = {
           } else {
             interaction.editReply({
               content:
-                "The colour you provided was wrong. It must be provided as a hex code, such as `#123abc`.\n\n*Need help choosing a colour? Try one of the buttons below.*",
+                "The colour you provided was wrong. It must be provided as a hex code, such as `#123abc`, or a pre-defined colour such as `red`.\n\n*Need help choosing a colour? Try one of the buttons below.*",
               components: [colourButton],
             });
             return;
@@ -154,6 +152,7 @@ module.exports.run = {
               name: interaction.options.getString(),
               color: rolecolour,
               hoist: false,
+              position: 26
             },
           })
           .then((role) => {
@@ -234,5 +233,5 @@ module.exports.run = {
 
 module.exports.help = {
   name: "role",
-  usage: "(NYI)",
+  usage: "Set a custom role",
 };
