@@ -1,4 +1,4 @@
-import { Client } from "discord.js";
+import { Client, User, GuildMember } from "discord.js";
 
 const config = require("../../data/config");
 
@@ -14,7 +14,11 @@ const config = require("../../data/config");
  * @param {Array} name - Array of emoji names.
  * @param {Array} id - Array of emoji IDs.
  */
-export async function parseBadges(name: Array<string>, id: Array<string>, badges: Array<string>) {
+export async function parseBadges(
+  name: Array<string>,
+  id: Array<string>,
+  badges: Array<string>
+) {
   let counter = 0;
   let badgesToAdd = [];
   try {
@@ -45,7 +49,7 @@ export async function construct(r, list: Array<string>) {
  *
  */
 export async function spaceout(args) {
-  console.log(args)
+  console.log(args);
   let yes = "";
   if (/^(No)\s(\w+)\s(badges)$/.test(args[0])) return args[0];
   for (let value of args) {
@@ -57,7 +61,11 @@ export async function spaceout(args) {
 /**
  *
  */
-export async function createServerBadges(client: Client, user_id: string, guild) {
+export async function createServerBadges(
+  client: Client,
+  user_id: string,
+  guild
+) {
   let serverBadgeEmoji = [
     // Full Moderation
     "crown", // Owner
@@ -77,18 +85,19 @@ export async function createServerBadges(client: Client, user_id: string, guild)
   let badgesToAdd = [];
   let r = [];
 
-  let user = client.users.cache.get(user_id);
-  let roles = await guild.members.fetch(user)._roles;
+  let user: User = client.users.cache.get(user_id);
+  let guildMember: GuildMember = await guild.members.fetch(user)
+  let roles = guildMember.roles.cache
 
   if (config.OWNER_ID.includes(user_id)) r.push("crown", "tools"); // Owner
-  if (roles.includes("908691786669654047")) r.push("zap"); // Admin
-  if (roles.includes("908691413372395541")) r.push("star"); // Moderator
+  if (roles.has("908691786669654047")) r.push("zap"); // Admin
+  if (roles.has("908691413372395541")) r.push("star"); // Moderator
 
-  if (roles.includes("909235572755800104")) r.push("wrench");
-  if (roles.includes("908680453286924303")) r.push("pushpin");
-  if (roles.includes("908680453286924305")) r.push("video_game");
-  if (roles.includes("908680453286924301")) r.push("tada");
-  if (roles.includes("908680453286924302")) r.push("speech_left");
+  if (roles.has("909235572755800104")) r.push("wrench");
+  if (roles.has("908680453286924303")) r.push("pushpin");
+  if (roles.has("908680453286924305")) r.push("video_game");
+  if (roles.has("908680453286924301")) r.push("tada");
+  if (roles.has("908680453286924302")) r.push("speech_left");
 
   let counter = 0;
   serverBadgeEmoji.forEach((Element) => {
@@ -122,10 +131,34 @@ export async function createPrideBadges(r) {
     "<:agender:915950806925213706>",
     "<:nd:798918686676353034>",
     "<:catgender:916128763203420161>",
-    "<:progress:916128799479955467>",
+    "<:ally:916128799479955467>",
   ];
-  let prideBadgeEmoji = []; // Badge types
-  let prideBadgeEmoID = [];
+  let prideBadgeEmoji = [
+    "enby",
+    "aro",
+    "ace",
+    "gq",
+    "pan",
+    "bi",
+    "les",
+    "agender",
+    "nd",
+    "catgender",
+    "ally",
+  ]; // Badge types
+  let prideBadgeEmoID = [
+    "915950848121663559",
+    "915950829054332959",
+    "915950767649734757",
+    "915950873098747915",
+    "915950724838461490",
+    "915950686661906452",
+    "915950916606242816",
+    "915950806925213706",
+    "798918686676353034",
+    "916128763203420161",
+    "916128799479955467"
+  ];
 
   let found = await construct(r, fullList);
   if (found == ["No badges"]) return found;
@@ -150,8 +183,8 @@ export async function createPrideBadges(r) {
   if (r.includes("gay")) {
     badgesToAdd.push(":rainbow_flag:");
   }
-  if (badgesToAdd.length == 0) return ["No badges"]
-  return badgesToAdd
+  if (badgesToAdd.length == 0) return ["No badges"];
+  return badgesToAdd;
 }
 
 export async function createInterestBadges(r: Array<string>) {
@@ -181,8 +214,10 @@ export async function createInterestBadges(r: Array<string>) {
     "817209133526024243",
     "817207987240304690",
     "817186008750751754",
+    "798918686676353034",
+    ""
   ];
-  console.log(r)
+  console.log(r);
   let found = await construct(r, fullList);
   if (found == ["No badges"]) return found;
   if (found) {
@@ -205,6 +240,6 @@ export async function createInterestBadges(r: Array<string>) {
   if (r.includes("artist")) {
     badgesToAdd.push(":paintbrush:");
   }
-  if (badgesToAdd.length == 0) return ["No badges"]
-  return badgesToAdd
+  if (badgesToAdd.length == 0) return ["No badges"];
+  return badgesToAdd;
 }

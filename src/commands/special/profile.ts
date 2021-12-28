@@ -22,7 +22,7 @@ import { Db } from "mongodb";
 
 const config = require("../../../data/config");
 
-function getUserFromMention(
+async function getUserFromMention(
   client: Client,
   mention
 ) /* Make a mention into a snowflake. */ {
@@ -40,7 +40,9 @@ async function dbSearch(
   db: Db,
   search: string
 ) /* Search for a user via memberid. */ {
-  return db.collection("profiles").findOne({ user: search });
+  return db.collection("profiles").findOne({
+    user: search,
+  });
 }
 
 async function dbUpdate(
@@ -50,13 +52,26 @@ async function dbUpdate(
   content: any
 ) /* Update details on the database. */ {
   db.collection("profiles").updateOne(
-    { user: search },
-    { $set: { _field: content } }
+    {
+      user: search,
+    },
+    {
+      $set: {
+        _field: content,
+      },
+    }
   );
 }
 
 async function dbClear(db: Db, search: string, item: string) {
-  db.collection("profiles").updateOne({ user: search }, { $unset: item });
+  db.collection("profiles").updateOne(
+    {
+      user: search,
+    },
+    {
+      $unset: item,
+    }
+  );
 }
 
 // Pride badge buttons
@@ -183,23 +198,74 @@ const gameClearButton = new MessageActionRow().addComponents(
 
 // Pre-defined colours
 const colours = [
-  { name: "red", hex: "ff0000" },
-  { name: "orange", hex: "e67e22" },
-  { name: "yellow", hex: "f1c40f" },
-  { name: "purple", hex: "9b59b6" },
-  { name: "lime", hex: "2ecc71" },
-  { name: "green", hex: "1f8b4c" },
-  { name: "aqua", hex: "00d6ff" },
-  { name: "blue", hex: "3498db" },
-  { name: "darkBlue", hex: "0012c3" },
-  { name: "magenta", hex: "ff008f" },
-  { name: "pink", hex: "ff7ee7" },
-  { name: "white", hex: "ffffff" },
-  { name: "black", hex: "000000" },
-  { name: "grey", hex: "95a5a6" },
-  { name: "ninja", hex: "36393e" },
-  { name: "blurpleOld", hex: "7289da" },
-  { name: "blurpleNew", hex: "5865f2" },
+  {
+    name: "red",
+    hex: "ff0000",
+  },
+  {
+    name: "orange",
+    hex: "e67e22",
+  },
+  {
+    name: "yellow",
+    hex: "f1c40f",
+  },
+  {
+    name: "purple",
+    hex: "9b59b6",
+  },
+  {
+    name: "lime",
+    hex: "2ecc71",
+  },
+  {
+    name: "green",
+    hex: "1f8b4c",
+  },
+  {
+    name: "aqua",
+    hex: "00d6ff",
+  },
+  {
+    name: "blue",
+    hex: "3498db",
+  },
+  {
+    name: "darkBlue",
+    hex: "0012c3",
+  },
+  {
+    name: "magenta",
+    hex: "ff008f",
+  },
+  {
+    name: "pink",
+    hex: "ff7ee7",
+  },
+  {
+    name: "white",
+    hex: "ffffff",
+  },
+  {
+    name: "black",
+    hex: "000000",
+  },
+  {
+    name: "grey",
+    hex: "95a5a6",
+  },
+  {
+    name: "ninja",
+    hex: "36393e",
+  },
+  {
+    name: "blurpleOld",
+    hex: "7289da",
+  },
+  {
+    name: "blurpleNew",
+    hex: "5865f2",
+  },
 ];
 
 async function createEmbed(
@@ -216,10 +282,13 @@ async function createEmbed(
   let embed = new MessageEmbed()
     .setTitle(r.name)
     .setColor(r.colour)
-    .setDescription(
-      `**Pronouns**: ${r.pronouns}\n**Birthday**: ${r.bday}`
+    .setDescription(`**Pronouns**: ${r.pronouns}\n**Birthday**: ${r.bday} (age ${r.age ? r.age : "unknown"})`)
+    .setThumbnail(
+      user.avatarURL({
+        dynamic: true,
+        size: 1024,
+      })
     )
-    .setThumbnail(user.avatarURL({ dynamic: true, size: 1024 }))
     .setAuthor(r.usertag)
     // .addField(
     //   "Game Badges",
@@ -232,14 +301,14 @@ async function createEmbed(
     )
     .addField(
       "Pride Badges",
-      await pf.spaceout(await pf.createPrideBadges(r.pbadges)),
+      await pf.spaceout(await pf.createPrideBadges(r.pride)),
       true
     )
     .setFooter(`Member ID: ${r.user}`);
   if (r.tz !== null)
     embed.addField(
       `The time for me is ${time}.`,
-      `**Time zone**: ${r.tz}`,
+      `**Time zone**: ${r.timezone}`,
       false
     );
   if (r.bio !== null) embed.addField(r.bio.title, r.bio.desc, false);
@@ -248,6 +317,7 @@ async function createEmbed(
   } catch {
     console.log("No bio image!");
   }
+  console.log(embed)
   return embed;
 }
 
@@ -500,13 +570,15 @@ module.exports.run = {
         let result = await dbSearch(db, user.id);
         if (result) {
           console.log(result);
-          let embed = createEmbed(
+          let embed = await createEmbed(
             interaction.client,
             result,
             interaction.client.users.cache.get(result.user),
             interaction.guild
           );
-          interaction.editReply({ embeds: [embed] });
+          await interaction.editReply({
+            embeds: [embed],
+          });
         } else {
           interaction.editReply("This user does not have a server proile.");
           if (interaction.user.id == user.id) {
@@ -519,7 +591,9 @@ module.exports.run = {
         }
         return;
       case "edit":
-        await interaction.deferReply({ ephemeral: true });
+        await interaction.deferReply({
+          ephemeral: true,
+        });
         let value;
         switch (interaction.options.getSubcommand()) {
           case "badges":
@@ -535,7 +609,7 @@ module.exports.run = {
             interaction.editReply(`Your __name__ was updated to **${value}**.`);
             break;
           case "birthday":
-            value = `${interaction.options.getString(
+            value = `${interaction.options.getInteger(
               "day"
             )} ${interaction.options.getString("month")}`;
             if (
@@ -595,7 +669,9 @@ module.exports.run = {
                 interaction.editReply(appr);
                 break;
               case "mc":
-                interaction.editReply({ embeds: [setupMinecraft] });
+                interaction.editReply({
+                  embeds: [setupMinecraft],
+                });
                 break;
             }
             break;
@@ -673,15 +749,15 @@ module.exports.run = {
             interaction.editReply(`Your __image__ was updated to **${value}**`);
             break;
         }
-        break
+        break;
       case "clear":
         let field = interaction.options.getString("field");
         let respo = `Your **${field}** was deleted from the profile.`;
         switch (field) {
           case "delete":
-            await db
-              .collection("profiles")
-              .deleteOne({ user: interaction.user.id });
+            await db.collection("profiles").deleteOne({
+              user: interaction.user.id,
+            });
             await interaction.editReply("Your profile was deleted.");
             break;
           case "name":
