@@ -14,7 +14,7 @@ const config = require("../../data/config");
  * @param {Array} name - Array of emoji names.
  * @param {Array} id - Array of emoji IDs.
  */
-export async function parseBadges(name: Array<string>, id: Array<string>, badges: string) {
+export async function parseBadges(name: Array<string>, id: Array<string>, badges: Array<string>) {
   let counter = 0;
   let badgesToAdd = [];
   try {
@@ -78,7 +78,7 @@ export async function createServerBadges(client: Client, user_id: string, guild)
   let r = [];
 
   let user = client.users.cache.get(user_id);
-  let roles = guild.member(user)._roles;
+  let roles = await guild.members.fetch(user)._roles;
 
   if (config.OWNER_ID.includes(user_id)) r.push("crown", "tools"); // Owner
   if (roles.includes("908691786669654047")) r.push("zap"); // Admin
@@ -154,7 +154,7 @@ export async function createPrideBadges(r) {
   return badgesToAdd
 }
 
-export async function createInterestBadges(r) {
+export async function createInterestBadges(r: Array<string>) {
   // Declare variable types.
   let badgesToAdd = [];
   let fullList = [

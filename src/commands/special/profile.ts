@@ -40,7 +40,7 @@ async function dbSearch(
   db: Db,
   search: string
 ) /* Search for a user via memberid. */ {
-  return await db.collection("profiles").findOne({ _id: search });
+  return db.collection("profiles").findOne({ user: search });
 }
 
 async function dbUpdate(
@@ -50,13 +50,13 @@ async function dbUpdate(
   content: any
 ) /* Update details on the database. */ {
   db.collection("profiles").updateOne(
-    { _id: search },
+    { user: search },
     { $set: { _field: content } }
   );
 }
 
 async function dbClear(db: Db, search: string, item: string) {
-  db.collection("profiles").updateOne({ _id: search }, { $unset: item });
+  db.collection("profiles").updateOne({ user: search }, { $unset: item });
 }
 
 // Pride badge buttons
@@ -211,23 +211,23 @@ async function createEmbed(
   let time = DateTime.now()
     .setZone(r.timezone)
     .toLocaleString(DateTime.DATETIME_MED);
-  console.log(await pf.spaceout(await pf.createInterestBadges(r.ibadges)));
+  // console.log(await pf.spaceout(await pf.createInterestBadges(r.ibadges)));
   console.log(r);
   let embed = new MessageEmbed()
-    .setTitle(r.username)
+    .setTitle(r.name)
     .setColor(r.colour)
     .setDescription(
-      `**Name**: ${r.name}\n**Pronouns**: ${r.pronouns}\n**Birthday**: ${r.bday}`
+      `**Pronouns**: ${r.pronouns}\n**Birthday**: ${r.bday}`
     )
     .setThumbnail(user.avatarURL({ dynamic: true, size: 1024 }))
-    .setAuthor("Hyla + Friends Server Profile")
-    .addField(
-      "Game Badges",
-      await pf.spaceout(await pf.createInterestBadges(r.ibadges))
-    )
+    .setAuthor(r.usertag)
+    // .addField(
+    //   "Game Badges",
+    //   await pf.spaceout(await pf.createInterestBadges(r.ibadges))
+    // )
     .addField(
       "Staff Badges",
-      await pf.spaceout(await pf.createServerBadges(client, r.memberid, guild)),
+      await pf.spaceout(await pf.createServerBadges(client, r.user, guild)),
       true
     )
     .addField(
@@ -235,7 +235,7 @@ async function createEmbed(
       await pf.spaceout(await pf.createPrideBadges(r.pbadges)),
       true
     )
-    .setFooter(`Member ID: ${r.memberid}`);
+    .setFooter(`Member ID: ${r.user}`);
   if (r.tz !== null)
     embed.addField(
       `The time for me is ${time}.`,
@@ -503,7 +503,7 @@ module.exports.run = {
           let embed = createEmbed(
             interaction.client,
             result,
-            interaction.client.users.cache.get(result._id),
+            interaction.client.users.cache.get(result.user),
             interaction.guild
           );
           interaction.editReply({ embeds: [embed] });
@@ -681,7 +681,7 @@ module.exports.run = {
           case "delete":
             await db
               .collection("profiles")
-              .deleteOne({ _id: interaction.user.id });
+              .deleteOne({ user: interaction.user.id });
             await interaction.editReply("Your profile was deleted.");
             break;
           case "name":
