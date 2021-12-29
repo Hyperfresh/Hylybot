@@ -5,6 +5,10 @@ import {
   MessageButton,
   MessageActionRow,
   Guild,
+  CommandInteraction,
+  User,
+  Interaction,
+  ButtonInteraction,
   GuildMember,
 } from "discord.js";
 
@@ -16,7 +20,8 @@ import * as timezone from "moment-timezone";
 import isImageURL from "image-url-validator";
 import minecraftPlayer = require("minecraft-player");
 
-import * as pf from "../../helpers/profile-badge-helper";
+import * as badgeHelper from "../../helpers/profile-badge-helper";
+import * as buttonHelper from "../../helpers/profile-button-helper"
 
 import { Db } from "mongodb";
 
@@ -69,7 +74,7 @@ async function dbClear(db: Db, search: string, item: string) {
       user: search,
     },
     {
-      $unset: item,
+      $set: {item: null},
     }
   );
 }
@@ -80,7 +85,7 @@ const BadgeButton1 = new MessageActionRow().addComponents(
       .setLabel("View my current badges")
       .setStyle("PRIMARY")
       .setEmoji("🔍")
-      .setCustomId("view"),
+      .setCustomId("viewPride"),
     new MessageButton()
       .setLabel("Gay")
       .setStyle("SECONDARY")
@@ -90,7 +95,7 @@ const BadgeButton1 = new MessageActionRow().addComponents(
       .setLabel("Lesbian")
       .setStyle("SECONDARY")
       .setEmoji("915950916606242816")
-      .setCustomId("lesbian"),
+      .setCustomId("les"),
     new MessageButton()
       .setLabel("Bisexual")
       .setStyle("SECONDARY")
@@ -139,7 +144,7 @@ const BadgeButton1 = new MessageActionRow().addComponents(
       .setLabel("Catgender")
       .setStyle("SECONDARY")
       .setEmoji("916128763203420161")
-      .setCustomId("cat"),
+      .setCustomId("catgender"),
     new MessageButton()
       .setLabel("Ally")
       .setStyle("SECONDARY")
@@ -154,7 +159,7 @@ const BadgeButton1 = new MessageActionRow().addComponents(
       .setLabel("Clear my badges")
       .setStyle("DANGER")
       .setEmoji("💣")
-      .setCustomId("clear")
+      .setCustomId("clearPride")
   );
 
 // Colour picker button
@@ -272,7 +277,7 @@ const colours = [
 async function createEmbed(
   client: Client,
   r: any,
-  user: GuildMember,
+  user: User,
   guild: Guild
 ) /* Create the profile card. */ {
   let time = DateTime.now()
@@ -292,20 +297,20 @@ async function createEmbed(
     .setAuthor(r.usertag)
     .addField(
       "Game Interests & Hobbies",
-      await pf.spaceout(await pf.createInterestBadges(client, r.user, guild))
+      await badgeHelper.spaceout(await badgeHelper.createInterestBadges(client, r.user, guild))
     )
     .addField(
       "Staff Badges",
-      await pf.spaceout(await pf.createServerBadges(client, r.user, guild)),
+      await badgeHelper.spaceout(await badgeHelper.createServerBadges(client, r.user, guild)),
       true
     )
     .addField(
       "Pride Badges",
-      await pf.spaceout(await pf.createPrideBadges(r.pride)),
+      r.pride.length !== 0 ? await badgeHelper.spaceout(await badgeHelper.createPrideBadges(r.pride)) : "No badges",
       true
     )
     .setFooter(`Member ID: ${r.user}`);
-  if (r.tz !== null)
+  if (r.timezone != null)
     embed.addField(
       `The time for me is ${time}.`,
       `**Time zone**: ${r.timezone}`,
@@ -364,6 +369,9 @@ module.exports.run = {
       group
         .setName("edit")
         .setDescription("Edit your server profile.")
+        .addSubcommand(
+          (subcommand) => subcommand.setName("pronouns").setDescription("Add a set of neopronouns to your profile. For conventional pronouns, check #role-assign.").addStringOption((option) => option.setName("pronoun").setDescription("Write in the format \"they/them\".").setRequired(true))
+        )
         .addSubcommand(
           // Pride badges
           (subCommand) =>
@@ -552,7 +560,42 @@ module.exports.run = {
             .addChoice("Image", "image")
         )
     ),
-  async execute(interaction: any, db: Db) {
+  async execute(type: any, db: Db) {
+    if (type.isButton()) {
+      let interaction: ButtonInteraction = type
+      await interaction.deferUpdate()
+      switch (interaction.customId) {
+        case "viewPride":
+        case "gay":
+        case "les":
+        case "bi": 
+        case "pan":
+        case "ace":
+        case "aro":
+        case "trans": 
+        case "enby":
+        case "agender":
+        case "gq":
+        case "catgender":
+        case "ally":
+        case "nd":
+        case "clearPride":
+          await buttonHelper.buttonBadge(interaction, db)
+          break
+        case "clearGenshin":
+        case "clearFC":
+        case "clearMC":
+        case "clearTag":
+          await buttonHelper.clearGametag(interaction, db)
+          break
+        case "create":
+          await buttonHelper.setupProfile(interaction, db)
+          break
+      }
+      return
+    }
+
+    let interaction: CommandInteraction = type
     let test: string;
     try {
       test = interaction.options.getSubcommandGroup();
@@ -561,12 +604,14 @@ module.exports.run = {
       test = interaction.options.getSubcommand();
       console.log("Probably not a subcommand group. Got", test);
     }
+
+    let result: any
     switch (test) {
       case "view":
         await interaction.deferReply();
-        let user = await interaction.options.getUser("user");
+        let user = interaction.options.getUser("user");
         if (!user) user = interaction.user;
-        let result = await dbSearch(db, user.id);
+        result = await dbSearch(db, user.id);
         if (result) {
           let embed = await createEmbed(
             interaction.client,
@@ -592,12 +637,22 @@ module.exports.run = {
         await interaction.deferReply({
           ephemeral: true,
         });
+        result = await dbSearch(db, interaction.user.id);
+        if (!result) {
+          interaction.editReply({content: "It seems you do not have a server profile set up.\nWould you like to create one?", components: [setupButton]});
+          return
+        }
         let value;
         switch (interaction.options.getSubcommand()) {
+          case "pronouns":
+            value = interaction.options.getString("pronouns")
+            await db.collection("profiles").updateOne({user: interaction.user.id}, {$push: {"pronouns": value}})
+            interaction.editReply(`The __pronoun__ set \`${value}\` was added to your profile.`)
+            break
           case "badges":
             interaction.editReply({
               content:
-                "Click the appropriate buttons below to assign badges to your server profile. When you're done, delete this message.",
+                "Click the appropriate buttons below to assign badges to your server profile. When you're done, dismiss this message.",
               components: [BadgeButton1, BadgeButton2, BadgeButton3],
             });
             break;
@@ -749,6 +804,12 @@ module.exports.run = {
         }
         break;
       case "clear":
+        await interaction.deferReply()
+        result = await dbSearch(db, interaction.user.id);
+        if (!result) {
+          interaction.editReply({content: "It seems you do not have a server profile set up.\nWould you like to create one?", components: [setupButton]});
+          return
+        }
         let field = interaction.options.getString("field");
         let respo = `Your **${field}** was deleted from the profile.`;
         switch (field) {
@@ -758,23 +819,48 @@ module.exports.run = {
             });
             await interaction.editReply("Your profile was deleted.");
             break;
-          case "name":
           case "age":
           case "bio":
-          case "badges":
-          case "colour":
           case "timezone":
           case "image":
             await dbClear(db, interaction.user.id, field);
             await interaction.editReply(respo);
             break;
+          case "badges":
+            await db.collection("profiles").updateOne({user: interaction.user.id}, {$set: {"pride": []}})
+            await interaction.editReply(respo);
+            break;
+          case "name":
+            await db.collection("profiles").updateOne({user: interaction.user.id}, {$set: {"name": "Anonymous"}})
+            await interaction.editReply(respo);
+            break;
+          case "colour":
+            let user = await interaction.user.fetch(true)
+            await db.collection("profiles").updateOne({user: interaction.user.id}, {$set: {"colour": user.accentColor}})
+            await interaction.editReply(respo);
+            break;
           case "pronouns":
             await dbClear(db, interaction.user.id, field)
-              .then(() => {
-                let roles = [];
-                return roles;
+              .then(async () => {
+                let assign: Array<string>
+                
+                let guildMember: GuildMember = await interaction.guild.members.fetch(interaction.user)
+                let roles = guildMember.roles.cache
+
+                if (roles.has("908680453240791048")) assign.push("he/him")
+                if (roles.has("908680453240791047")) assign.push("she/her")
+                if (roles.has("908680453240791047")) assign.push("they/them")
+                if (roles.has("908680453240791045")) assign.push("any/all")
+                if (roles.has("908680453240791044")) assign.push("please ask!")
+
+                return assign;
               })
               .then(async (roles) => {
+                if (!roles) {
+                  interaction.editReply("It seems you haven't assigned your pronouns in <#908680453366616069>. [Do that first](https://ptb.discord.com/channels/908680453219815514/908680453366616069/908957528208060456) before clearing your pronouns in your server profile.")
+                  return
+                }
+
                 await dbUpdate(db, interaction.user.id, "pronouns", roles);
                 await interaction.editReply(
                   "Your pronouns were reset to the ones you obtained in <#908680453366616069>. If your pronouns are incorrect, please [re-assign the correct pronoun roles](https://ptb.discord.com/channels/908680453219815514/908680453366616069/908957528208060456), then run this command again."
@@ -790,7 +876,7 @@ module.exports.run = {
             break;
           case "gametag":
             await interaction.editReply(
-              "Choose the game tags you wish to delete. If you changed your mind, just delete this message."
+              {content: "Choose the game tags you wish to delete. If you changed your mind, just dismiss this message.", components: [gameClearButton]}
             );
             break;
         }

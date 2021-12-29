@@ -95,12 +95,19 @@ bot.on("interactionCreate", async (interaction) => {
   if (config.DEV_MODE && !config.OWNER_ID.includes(interaction.user.id)) return
 
   if (interaction.isButton()) {
+    let profileButtonID = ["viewPride", "gay", "lesbian", "bi","pan",
+  "ace","aro","trans","enby","agender","gq","cat","ally","nd","clearPride",
+"clearGenshin", "clearFC", "clearMC", "clearTag","create"]
     if (
       interaction.customId == "preCol" ||
       interaction.customId == "reassign"
     ) {
       let command = commands.get("role");
       command.run.execute(interaction, db);
+    }
+    if (profileButtonID.includes(interaction.customId)) {
+      let command = commands.get("profile")
+      command.run.execute(interaction, db)
     }
   }
   if (interaction.isCommand()) {

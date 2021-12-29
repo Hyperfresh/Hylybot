@@ -113,6 +113,8 @@ export async function createServerBadges(
  * Creates pride badges.
  */
 export async function createPrideBadges(r) {
+  if (r === null) return "No pride badges"
+
   // Create pride badges for embeds & database.
   // Declare variable types.
   let badgesToAdd = [];
