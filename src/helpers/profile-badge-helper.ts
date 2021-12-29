@@ -1,4 +1,4 @@
-import { Client, User, GuildMember } from "discord.js";
+import { Client, User, GuildMember, Guild } from "discord.js";
 
 const config = require("../../data/config");
 
@@ -46,10 +46,9 @@ export async function construct(r, list: Array<string>) {
 }
 
 /**
- *
+ * Spaces out an array.
  */
 export async function spaceout(args) {
-  console.log(args);
   let yes = "";
   if (/^(No)\s(\w+)\s(badges)$/.test(args[0])) return args[0];
   for (let value of args) {
@@ -59,12 +58,12 @@ export async function spaceout(args) {
 }
 
 /**
- *
+ * Creates server badges.
  */
 export async function createServerBadges(
   client: Client,
   user_id: string,
-  guild
+  guild: Guild
 ) {
   let serverBadgeEmoji = [
     // Full Moderation
@@ -90,14 +89,14 @@ export async function createServerBadges(
   let roles = guildMember.roles.cache
 
   if (config.OWNER_ID.includes(user_id)) r.push("crown", "tools"); // Owner
-  if (roles.has("908691786669654047")) r.push("zap"); // Admin
-  if (roles.has("908691413372395541")) r.push("star"); // Moderator
+  else if (roles.has("908691786669654047")) r.push("zap"); // Admin
+  else if (roles.has("908691413372395541")) r.push("star"); // Moderator
 
-  if (roles.has("909235572755800104")) r.push("wrench");
-  if (roles.has("908680453286924303")) r.push("pushpin");
-  if (roles.has("908680453286924305")) r.push("video_game");
-  if (roles.has("908680453286924301")) r.push("tada");
-  if (roles.has("908680453286924302")) r.push("speech_left");
+  if (roles.has("909235572755800104")) r.push("wrench"); // Bot Master
+  if (roles.has("908680453286924303")) r.push("pushpin"); // Media Pinner
+  if (roles.has("908680453286924305")) r.push("video_game"); // Game Event Coordinator
+  if (roles.has("908680453286924301")) r.push("tada"); // Giveaways
+  if (roles.has("908680453286924302")) r.push("speech_left"); // Splatulated Staff
 
   let counter = 0;
   serverBadgeEmoji.forEach((Element) => {
@@ -111,7 +110,7 @@ export async function createServerBadges(
 }
 
 /**
- *
+ * Creates pride badges.
  */
 export async function createPrideBadges(r) {
   // Create pride badges for embeds & database.
@@ -187,59 +186,59 @@ export async function createPrideBadges(r) {
   return badgesToAdd;
 }
 
-export async function createInterestBadges(r: Array<string>) {
+/**
+ * Creates interest badges.
+ */
+export async function createInterestBadges(client: Client,
+  user_id: string,
+  guild: Guild) {
   // Declare variable types.
-  let badgesToAdd = [];
   let fullList = [
     // This list is the full resolve for each interest badge.
     "<:minecraft:817185848373542963>",
     "<:amogus:817207798583525386>",
     "<:splatoon:817209133526024243>",
     "<:animalcrossing:817207987240304690>",
-    "<:terraria:817186008750751754>",
+    "<:mariokart:883867410636099605>",
+    "<:fortnite:919212370524504084>",
+    "<:paimon:908995938834608158>",
     ":video_game:",
     ":musical_note:",
     ":paintbrush:",
+    ":desktop:"
   ];
-  let interestBadgeEmoji = [
-    "minecraft",
-    "amogus",
-    "splatoon",
-    "animalcrossing",
-    "terraria",
-  ]; // Badge types
-  let interestBadgeEmoID = [
-    "817185848373542963",
-    "817207798583525386",
-    "817209133526024243",
-    "817207987240304690",
-    "817186008750751754",
-    "798918686676353034",
-    ""
-  ];
-  console.log(r);
-  let found = await construct(r, fullList);
-  if (found == ["No badges"]) return found;
-  if (found) {
-    // Function being used to construct interest badges for embed.
-    // Convert constructed badges from database to badge types
-    let temp = [];
-    for (let i = 0; i < r.length; i++) {
-      if (fullList.includes(r[i])) temp.push(interestBadgeEmoji[i]);
-    }
-    r = temp;
-  }
 
-  badgesToAdd = await parseBadges(interestBadgeEmoji, interestBadgeEmoID, r);
-  if (r.includes("musician")) {
-    badgesToAdd.push(":musical_note:");
-  }
-  if (r.includes("gameday")) {
-    badgesToAdd.push(":video_game:");
-  }
-  if (r.includes("artist")) {
-    badgesToAdd.push(":paintbrush:");
-  }
+  let badgesToAdd = [];
+  let r = [];
+
+
+  let user: User = client.users.cache.get(user_id);
+  let guildMember: GuildMember = await guild.members.fetch(user)
+  let roles = guildMember.roles.cache
+
+  // Custom emojis & game events
+  if (roles.has("908680453253378076")) r.push(fullList[0])
+  if (roles.has("908680453253378074")) r.push(fullList[1])
+  if (roles.has("908680453253378071")) r.push(fullList[2])
+  if (roles.has("908680453253378072")) r.push(fullList[3])
+  if (roles.has("908680453240791049")) r.push(fullList[4])
+  if (roles.has("925603076822405120")) r.push(fullList[5])
+  if (roles.has("908900125911437332")) r.push(fullList[6])
+  if (roles.has("908680453253378073")) r.push(":video_game:")
+
+  // Now the fun stuff
+  if (roles.has("908680453219815518")) r.push(":paintbrush:")
+  if (roles.has("908680453219815517")) r.push(":musical_note:")
+  if (roles.has("908680453219815516")) r.push(":desktop:")
+
+
+  let counter = 0;
+  fullList.forEach((Element) => {
+    if (r.includes(Element)) {
+      badgesToAdd.push(`${fullList[counter]}`);
+    }
+    counter += 1;
+  });
   if (badgesToAdd.length == 0) return ["No badges"];
   return badgesToAdd;
 }

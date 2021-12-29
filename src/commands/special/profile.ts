@@ -79,12 +79,12 @@ const BadgeButton1 = new MessageActionRow().addComponents(
     new MessageButton()
       .setLabel("View my current badges")
       .setStyle("PRIMARY")
-      .setEmoji("mag")
+      .setEmoji("🔍")
       .setCustomId("view"),
     new MessageButton()
       .setLabel("Gay")
       .setStyle("SECONDARY")
-      .setEmoji("rainbow_flag")
+      .setEmoji("🏳️‍🌈")
       .setCustomId("gay"),
     new MessageButton()
       .setLabel("Lesbian")
@@ -95,11 +95,12 @@ const BadgeButton1 = new MessageActionRow().addComponents(
       .setLabel("Bisexual")
       .setStyle("SECONDARY")
       .setEmoji("915950686661906452")
-      .setCustomId("enby"),
+      .setCustomId("bi"),
     new MessageButton()
       .setLabel("Pansexual")
       .setStyle("SECONDARY")
       .setEmoji("915950724838461490")
+      .setCustomId("pan")
   ),
   BadgeButton2 = new MessageActionRow().addComponents(
     new MessageButton()
@@ -115,7 +116,7 @@ const BadgeButton1 = new MessageActionRow().addComponents(
     new MessageButton()
       .setLabel("Transgender")
       .setStyle("SECONDARY")
-      .setEmoji("transgender_flag")
+      .setEmoji("🏳️‍⚧️")
       .setCustomId("trans"),
     new MessageButton()
       .setLabel("Non-Binary")
@@ -152,7 +153,7 @@ const BadgeButton1 = new MessageActionRow().addComponents(
     new MessageButton()
       .setLabel("Clear my badges")
       .setStyle("DANGER")
-      .setEmoji("bomb")
+      .setEmoji("💣")
       .setCustomId("clear")
   );
 
@@ -277,7 +278,6 @@ async function createEmbed(
   let time = DateTime.now()
     .setZone(r.timezone)
     .toLocaleString(DateTime.DATETIME_MED);
-  // console.log(await pf.spaceout(await pf.createInterestBadges(r.ibadges)));
   console.log(r);
   let embed = new MessageEmbed()
     .setTitle(r.name)
@@ -290,10 +290,10 @@ async function createEmbed(
       })
     )
     .setAuthor(r.usertag)
-    // .addField(
-    //   "Game Badges",
-    //   await pf.spaceout(await pf.createInterestBadges(r.ibadges))
-    // )
+    .addField(
+      "Game Interests & Hobbies",
+      await pf.spaceout(await pf.createInterestBadges(client, r.user, guild))
+    )
     .addField(
       "Staff Badges",
       await pf.spaceout(await pf.createServerBadges(client, r.user, guild)),
@@ -317,7 +317,6 @@ async function createEmbed(
   } catch {
     console.log("No bio image!");
   }
-  console.log(embed)
   return embed;
 }
 
@@ -569,7 +568,6 @@ module.exports.run = {
         if (!user) user = interaction.user;
         let result = await dbSearch(db, user.id);
         if (result) {
-          console.log(result);
           let embed = await createEmbed(
             interaction.client,
             result,
