@@ -126,6 +126,14 @@ bot.on("interactionCreate", async (interaction) => {
   }
 });
 
+// Check if it's someone's birthday, and send a message at 7am server time
+import birthdayCheck from './loops/birthdayCheck';
+setInterval(async () => {
+  let mongod = await MongoClient.connect(url);
+  let db = mongod.db(dbName);
+  await birthdayCheck(db, bot)
+}, 3600000);
+
 // import OzAlertFetch from "./loops/ozalert"
 // setInterval(async () => await OzAlertFetch(bot), 60000)
 
