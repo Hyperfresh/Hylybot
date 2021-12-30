@@ -96,7 +96,7 @@ bot.on("interactionCreate", async (interaction) => {
 
   if (interaction.isButton()) {
     let profileButtonID = ["viewPride", "gay", "lesbian", "bi","pan",
-  "ace","aro","trans","enby","agender","gq","cat","ally","nd","clearPride",
+  "ace","aro","trans","enby","agender","gq","catgender","ally","nd","clearPride",
 "clearGenshin", "clearFC", "clearMC", "clearTag","create"]
     if (
       interaction.customId == "preCol" ||

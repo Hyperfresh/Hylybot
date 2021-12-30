@@ -85,11 +85,13 @@ export async function createServerBadges(
   let r = [];
 
   let user: User = client.users.cache.get(user_id);
-  let guildMember: GuildMember = await guild.members.fetch(user)
-  let roles = guildMember.roles.cache
+  let guildMember: GuildMember = await guild.members.fetch(user);
+  let roles = guildMember.roles.cache;
 
-  if (config.OWNER_ID.includes(user_id)) r.push("crown", "tools"); // Owner
-  else if (roles.has("908691786669654047")) r.push("zap"); // Admin
+  if (config.OWNER_ID.includes(user_id)) r.push("crown", "tools");
+  // Owner
+  else if (roles.has("908691786669654047")) r.push("zap");
+  // Admin
   else if (roles.has("908691413372395541")) r.push("star"); // Moderator
 
   if (roles.has("909235572755800104")) r.push("wrench"); // Bot Master
@@ -113,7 +115,7 @@ export async function createServerBadges(
  * Creates pride badges.
  */
 export async function createPrideBadges(r) {
-  if (r === null) return "No pride badges"
+  if (r === null) return "No pride badges";
 
   // Create pride badges for embeds & database.
   // Declare variable types.
@@ -158,7 +160,7 @@ export async function createPrideBadges(r) {
     "915950806925213706",
     "798918686676353034",
     "916128763203420161",
-    "916128799479955467"
+    "916128799479955467",
   ];
 
   let found = await construct(r, fullList);
@@ -191,9 +193,11 @@ export async function createPrideBadges(r) {
 /**
  * Creates interest badges.
  */
-export async function createInterestBadges(client: Client,
+export async function createInterestBadges(
+  client: Client,
   user_id: string,
-  guild: Guild) {
+  guild: Guild
+) {
   // Declare variable types.
   let fullList = [
     // This list is the full resolve for each interest badge.
@@ -207,32 +211,30 @@ export async function createInterestBadges(client: Client,
     ":video_game:",
     ":musical_note:",
     ":paintbrush:",
-    ":desktop:"
+    ":desktop:",
   ];
 
   let badgesToAdd = [];
   let r = [];
 
-
   let user: User = client.users.cache.get(user_id);
-  let guildMember: GuildMember = await guild.members.fetch(user)
-  let roles = guildMember.roles.cache
+  let guildMember: GuildMember = await guild.members.fetch(user);
+  let roles = guildMember.roles.cache;
 
   // Custom emojis & game events
-  if (roles.has("908680453253378076")) r.push(fullList[0])
-  if (roles.has("908680453253378074")) r.push(fullList[1])
-  if (roles.has("908680453253378071")) r.push(fullList[2])
-  if (roles.has("908680453253378072")) r.push(fullList[3])
-  if (roles.has("908680453240791049")) r.push(fullList[4])
-  if (roles.has("925603076822405120")) r.push(fullList[5])
-  if (roles.has("908900125911437332")) r.push(fullList[6])
-  if (roles.has("908680453253378073")) r.push(":video_game:")
+  if (roles.has("908680453253378076")) r.push(fullList[0]);
+  if (roles.has("908680453253378074")) r.push(fullList[1]);
+  if (roles.has("908680453253378071")) r.push(fullList[2]);
+  if (roles.has("908680453253378072")) r.push(fullList[3]);
+  if (roles.has("908680453240791049")) r.push(fullList[4]);
+  if (roles.has("925603076822405120")) r.push(fullList[5]);
+  if (roles.has("908900125911437332")) r.push(fullList[6]);
+  if (roles.has("908680453253378073")) r.push(":video_game:");
 
   // Now the fun stuff
-  if (roles.has("908680453219815518")) r.push(":paintbrush:")
-  if (roles.has("908680453219815517")) r.push(":musical_note:")
-  if (roles.has("908680453219815516")) r.push(":desktop:")
-
+  if (roles.has("908680453219815518")) r.push(":paintbrush:");
+  if (roles.has("908680453219815517")) r.push(":musical_note:");
+  if (roles.has("908680453219815516")) r.push(":desktop:");
 
   let counter = 0;
   fullList.forEach((Element) => {

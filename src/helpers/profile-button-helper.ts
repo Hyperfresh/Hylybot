@@ -1,7 +1,15 @@
-import { ButtonInteraction, Client, Guild, GuildMember, MessageEmbed, User } from "discord.js";
+import {
+  ButtonInteraction,
+  Client,
+  Guild,
+  GuildMember,
+  MessageEmbed,
+  User,
+} from "discord.js";
 import { Db } from "mongodb";
 import * as badgeHelper from "./profile-badge-helper";
-import { DateTime } from "luxon"
+
+import {createEmbed} from "../commands/special/profile"
 
 async function dbSearch(
   db: Db,
@@ -12,73 +20,24 @@ async function dbSearch(
   });
 }
 
-async function createEmbed(
-    client: Client,
-    r: any,
-    user: User,
-    guild: Guild
-  ) /* Create the profile card. */ {
-    let time = DateTime.now()
-      .setZone(r.timezone)
-      .toLocaleString(DateTime.DATETIME_MED);
-    console.log(r);
-    let embed = new MessageEmbed()
-      .setTitle(r.name)
-      .setColor(r.colour)
-      .setDescription(`**Pronouns**: ${r.pronouns}\n**Birthday**: ${r.bday} (age ${r.age ? r.age : "unknown"})`)
-      .setThumbnail(
-        user.avatarURL({
-          dynamic: true,
-          size: 1024,
-        })
-      )
-      .setAuthor(r.usertag)
-      .addField(
-        "Game Interests & Hobbies",
-        await badgeHelper.spaceout(await badgeHelper.createInterestBadges(client, r.user, guild))
-      )
-      .addField(
-        "Staff Badges",
-        await badgeHelper.spaceout(await badgeHelper.createServerBadges(client, r.user, guild)),
-        true
-      )
-      .addField(
-        "Pride Badges",
-        await badgeHelper.spaceout(await badgeHelper.createPrideBadges(r.pride)),
-        true
-      )
-      .setFooter(`Member ID: ${r.user}`);
-    if (r.tz !== null)
-      embed.addField(
-        `The time for me is ${time}.`,
-        `**Time zone**: ${r.timezone}`,
-        false
-      );
-    if (r.bio !== null) embed.addField(r.bio.title, r.bio.desc, false);
-    try {
-      if (r.image !== null) embed.setImage(r.image);
-    } catch {
-      console.log("No bio image!");
-    }
-    return embed;
-  }
-
 export async function buttonBadge(interaction: ButtonInteraction, db: Db) {
-  console.log(interaction)
+  console.log(interaction);
   let result = await dbSearch(db, interaction.user.id);
   if (interaction.customId == "viewPride") {
     if (result.pride.length == 0) {
-      interaction.editReply("You have no badges assigned.")
-      return
+      interaction.editReply("You have no badges assigned.");
+      return;
     }
-    let badges = await badgeHelper.spaceout(await badgeHelper.createPrideBadges(result.pride));
+    let badges = await badgeHelper.spaceout(
+      await badgeHelper.createPrideBadges(result.pride)
+    );
     interaction.editReply(`Here are your current badges: ${badges}`);
     return;
   }
   if (interaction.customId == "clearPride") {
     await db
       .collection("profiles")
-      .updateOne({ user: interaction.user.id }, { $set: {"pride": [] }});
+      .updateOne({ user: interaction.user.id }, { $set: { pride: [] } });
     interaction.editReply("Your badges were cleared.");
     return;
   }
@@ -137,8 +96,8 @@ export async function clearGametag(interaction: ButtonInteraction, db: Db) {
 export async function setupProfile(interaction: ButtonInteraction, db: Db) {
   let result = await dbSearch(db, interaction.user.id);
   if (result) {
-    interaction.editReply("You've already created your server profile!")
-    return
+    interaction.editReply("You've already created your server profile!");
+    return;
   }
 
   let assign: Array<string> = [];
@@ -154,27 +113,48 @@ export async function setupProfile(interaction: ButtonInteraction, db: Db) {
   if (roles.has("908680453240791045")) assign.push("any/all");
   if (roles.has("908680453240791044")) assign.push("please ask!");
 
+  // Neopronouns
+  if (roles.has("923067643869679656")) assign.push("mew/mews");
+  if (roles.has("923067492694372412")) assign.push("mo/mos");
+
   if (!assign || assign.length == 0) {
-    interaction.editReply("It seems you haven't assigned your pronouns in <#908680453366616069>. [Do that first](https://ptb.discord.com/channels/908680453219815514/908680453366616069/908957528208060456) before setting up your profile.")
-    return
+    interaction.editReply(
+      "It seems you haven't assigned your pronouns in <#908680453366616069>. [Do that first](https://ptb.discord.com/channels/908680453219815514/908680453366616069/908957528208060456) before setting up your profile."
+    );
+    return;
   }
 
-  let user = await interaction.user.fetch(true)
+  let user = await interaction.user.fetch(true);
 
   await db.collection("profiles").insertOne({
-      user: user.id,
-      name: "Anonymous",
-      bday: "Unknown",
-      age: null,
-      pronouns: assign,
-      pride: [],
-      colour: user.accentColor,
-      timezone: null,
-      bio: null,
-      image: user.bannerURL({dynamic: true}),
-      usertag: interaction.user.tag
-  })
+    user: user.id,
+    name: "Anonymous",
+    bday: "Unknown",
+    age: null,
+    pronouns: assign,
+    pride: [],
+    colour: user.accentColor,
+    timezone: null,
+    bio: null,
+    gametags: {
+      genshin: null,
+      mc: null,
+      switch: null
+    },
+    image: user.bannerURL({ dynamic: true }),
+    usertag: interaction.user.tag,
+  });
 
-  let embed = await createEmbed(interaction.client, await dbSearch(db, user.id), user, interaction.guild)
-  interaction.editReply({content: "All done! Your profile has been successfully created.\nYou'll see below what it looks like at the moment: if you want to change anything, try `/profile edit`.", embeds: [embed]})
+  let embed = await createEmbed(
+    db,
+    interaction.client,
+    await dbSearch(db, user.id),
+    user,
+    interaction.guild
+  );
+  interaction.editReply({
+    content:
+      "All done! Your profile has been successfully created.\nYou'll see below what it looks like at the moment: if you want to change anything, try `/profile edit`.",
+    embeds: [embed],
+  });
 }

@@ -7,7 +7,6 @@ import {
   Guild,
   CommandInteraction,
   User,
-  Interaction,
   ButtonInteraction,
   GuildMember,
 } from "discord.js";
@@ -18,27 +17,105 @@ import { DateTime } from "luxon";
 import * as timezone from "moment-timezone";
 
 import isImageURL from "image-url-validator";
-import minecraftPlayer = require("minecraft-player");
 
 import * as badgeHelper from "../../helpers/profile-badge-helper";
-import * as buttonHelper from "../../helpers/profile-button-helper"
+import * as buttonHelper from "../../helpers/profile-button-helper";
 
 import { Db } from "mongodb";
 
-const config = require("../../../data/config");
+import {
+  updateMinecraft,
+  parseMinecraft,
+} from "../../helpers/minecraft-helper";
 
-async function getUserFromMention(
+/**
+ * Create a profile card.
+ * @param {Db} db MongoDB object
+ * @param {Client} client Discord client object
+ * @param r Result object
+ * @param {User} user User object
+ * @param {Guild} guild Guild object
+ */
+
+export async function createEmbed(
+  db: Db,
   client: Client,
-  mention
-) /* Make a mention into a snowflake. */ {
-  if (!mention) return;
-  if (mention.startsWith("<@") && mention.endsWith(">")) {
-    mention = mention.slice(2, -1);
-    if (mention.startsWith("!")) {
-      mention = mention.slice(1);
-    }
-    return client.users.cache.get(mention);
+  r: any,
+  user: User,
+  guild: Guild
+): Promise<MessageEmbed> {
+  let time = DateTime.now()
+    .setZone(r.timezone)
+    .toLocaleString(DateTime.DATETIME_MED);
+  console.log(r);
+  let embed = new MessageEmbed()
+    .setTitle(r.name)
+    .setColor(r.colour)
+    .setDescription(
+      `**Pronouns**: ${r.pronouns}\n**Birthday**: ${r.bday} (age ${
+        r.age ? r.age : "unknown"
+      })`
+    )
+    .setThumbnail(
+      user.avatarURL({
+        dynamic: true,
+        size: 1024,
+      })
+    )
+    .setAuthor(r.usertag)
+    .addField(
+      "Game Interests & Hobbies",
+      await badgeHelper.spaceout(
+        await badgeHelper.createInterestBadges(client, r.user, guild)
+      )
+    )
+    .addField(
+      "Staff Badges",
+      await badgeHelper.spaceout(
+        await badgeHelper.createServerBadges(client, r.user, guild)
+      ),
+      true
+    )
+    .addField(
+      "Pride Badges",
+      r.pride.length !== 0
+        ? await badgeHelper.spaceout(
+            await badgeHelper.createPrideBadges(r.pride)
+          )
+        : "No badges",
+      true
+    )
+    .setFooter(`Member ID: ${r.user}`);
+  if (r.timezone != null)
+    embed.addField(
+      `The time for me is ${time}.`,
+      `**Time zone**: ${r.timezone}`,
+      false
+    );
+  if (r.bio !== null) embed.addField(r.bio.title, r.bio.desc, false);
+
+  let minecraft: string;
+  if (!r.gametags.mc) {
+    let res = await updateMinecraft(db, r.user);
+    if (res == -1) minecraft = "Unknown";
+  } else {
+    minecraft = await parseMinecraft(r.gametags.mc);
   }
+  embed.addField(
+    "Game tags",
+    `**Nintendo Switch FC**: ${
+      r.gametags.switch ? r.gametags.switch : "Unknown"
+    }\n**Genshin Impact UID**: ${
+      r.gametags.genshin ? r.gametags.genshin : "Unknown"
+    }\n**Minecraft Username**: ${minecraft}`
+  );
+
+  try {
+    if (r.image !== null) embed.setImage(r.image);
+  } catch {
+    console.log("No bio image!");
+  }
+  return embed;
 }
 
 async function dbSearch(
@@ -50,31 +127,13 @@ async function dbSearch(
   });
 }
 
-async function dbUpdate(
-  db: Db,
-  search: string,
-  _field: string,
-  content: any
-) /* Update details on the database. */ {
-  db.collection("profiles").updateOne(
-    {
-      user: search,
-    },
-    {
-      $set: {
-        _field: content,
-      },
-    }
-  );
-}
-
 async function dbClear(db: Db, search: string, item: string) {
   db.collection("profiles").updateOne(
     {
       user: search,
     },
     {
-      $set: {item: null},
+      $set: { item: null },
     }
   );
 }
@@ -274,57 +333,6 @@ const colours = [
   },
 ];
 
-async function createEmbed(
-  client: Client,
-  r: any,
-  user: User,
-  guild: Guild
-) /* Create the profile card. */ {
-  let time = DateTime.now()
-    .setZone(r.timezone)
-    .toLocaleString(DateTime.DATETIME_MED);
-  console.log(r);
-  let embed = new MessageEmbed()
-    .setTitle(r.name)
-    .setColor(r.colour)
-    .setDescription(`**Pronouns**: ${r.pronouns}\n**Birthday**: ${r.bday} (age ${r.age ? r.age : "unknown"})`)
-    .setThumbnail(
-      user.avatarURL({
-        dynamic: true,
-        size: 1024,
-      })
-    )
-    .setAuthor(r.usertag)
-    .addField(
-      "Game Interests & Hobbies",
-      await badgeHelper.spaceout(await badgeHelper.createInterestBadges(client, r.user, guild))
-    )
-    .addField(
-      "Staff Badges",
-      await badgeHelper.spaceout(await badgeHelper.createServerBadges(client, r.user, guild)),
-      true
-    )
-    .addField(
-      "Pride Badges",
-      r.pride.length !== 0 ? await badgeHelper.spaceout(await badgeHelper.createPrideBadges(r.pride)) : "No badges",
-      true
-    )
-    .setFooter(`Member ID: ${r.user}`);
-  if (r.timezone != null)
-    embed.addField(
-      `The time for me is ${time}.`,
-      `**Time zone**: ${r.timezone}`,
-      false
-    );
-  if (r.bio !== null) embed.addField(r.bio.title, r.bio.desc, false);
-  try {
-    if (r.image !== null) embed.setImage(r.image);
-  } catch {
-    console.log("No bio image!");
-  }
-  return embed;
-}
-
 // Click-to-create embed + button
 const setupProfile = new MessageEmbed()
   .setTitle(
@@ -369,8 +377,18 @@ module.exports.run = {
       group
         .setName("edit")
         .setDescription("Edit your server profile.")
-        .addSubcommand(
-          (subcommand) => subcommand.setName("pronouns").setDescription("Add a set of neopronouns to your profile. For conventional pronouns, check #role-assign.").addStringOption((option) => option.setName("pronoun").setDescription("Write in the format \"they/them\".").setRequired(true))
+        .addSubcommand((subcommand) =>
+          subcommand
+            .setName("pronouns")
+            .setDescription(
+              "Add a set of neopronouns to your profile. For conventional pronouns, check #role-assign."
+            )
+            .addStringOption((option) =>
+              option
+                .setName("pronoun")
+                .setDescription('Write in the format "they/them".')
+                .setRequired(true)
+            )
         )
         .addSubcommand(
           // Pride badges
@@ -562,17 +580,17 @@ module.exports.run = {
     ),
   async execute(type: any, db: Db) {
     if (type.isButton()) {
-      let interaction: ButtonInteraction = type
-      await interaction.deferUpdate()
+      let interaction: ButtonInteraction = type;
+      await interaction.deferUpdate();
       switch (interaction.customId) {
         case "viewPride":
         case "gay":
         case "les":
-        case "bi": 
+        case "bi":
         case "pan":
         case "ace":
         case "aro":
-        case "trans": 
+        case "trans":
         case "enby":
         case "agender":
         case "gq":
@@ -580,22 +598,22 @@ module.exports.run = {
         case "ally":
         case "nd":
         case "clearPride":
-          await buttonHelper.buttonBadge(interaction, db)
-          break
+          await buttonHelper.buttonBadge(interaction, db);
+          break;
         case "clearGenshin":
         case "clearFC":
         case "clearMC":
         case "clearTag":
-          await buttonHelper.clearGametag(interaction, db)
-          break
+          await buttonHelper.clearGametag(interaction, db);
+          break;
         case "create":
-          await buttonHelper.setupProfile(interaction, db)
-          break
+          await buttonHelper.setupProfile(interaction, db);
+          break;
       }
-      return
+      return;
     }
 
-    let interaction: CommandInteraction = type
+    let interaction: CommandInteraction = type;
     let test: string;
     try {
       test = interaction.options.getSubcommandGroup();
@@ -605,7 +623,7 @@ module.exports.run = {
       console.log("Probably not a subcommand group. Got", test);
     }
 
-    let result: any
+    let result: any;
     switch (test) {
       case "view":
         await interaction.deferReply();
@@ -614,6 +632,7 @@ module.exports.run = {
         result = await dbSearch(db, user.id);
         if (result) {
           let embed = await createEmbed(
+            db,
             interaction.client,
             result,
             interaction.client.users.cache.get(result.user),
@@ -639,16 +658,27 @@ module.exports.run = {
         });
         result = await dbSearch(db, interaction.user.id);
         if (!result) {
-          interaction.editReply({content: "It seems you do not have a server profile set up.\nWould you like to create one?", components: [setupButton]});
-          return
+          interaction.editReply({
+            content:
+              "It seems you do not have a server profile set up.\nWould you like to create one?",
+            components: [setupButton],
+          });
+          return;
         }
         let value;
         switch (interaction.options.getSubcommand()) {
           case "pronouns":
-            value = interaction.options.getString("pronouns")
-            await db.collection("profiles").updateOne({user: interaction.user.id}, {$push: {"pronouns": value}})
-            interaction.editReply(`The __pronoun__ set \`${value}\` was added to your profile.`)
-            break
+            value = interaction.options.getString("pronoun");
+            await db
+              .collection("profiles")
+              .updateOne(
+                { user: interaction.user.id },
+                { $push: { pronouns: value } }
+              );
+            interaction.editReply(
+              `The __pronoun__ set \`${value}\` was added to your profile.`
+            );
+            break;
           case "badges":
             interaction.editReply({
               content:
@@ -658,7 +688,10 @@ module.exports.run = {
             break;
           case "name":
             value = interaction.options.getString("value");
-            dbUpdate(db, interaction.user.id, "name", value);
+            db.collection("profiles").updateOne(
+              { user: interaction.user.id },
+              { $set: { name: value } }
+            );
             interaction.editReply(`Your __name__ was updated to **${value}**.`);
             break;
           case "birthday":
@@ -673,16 +706,17 @@ module.exports.run = {
               interaction.editReply("This seems like an invalid birthday.");
               return;
             }
-            dbUpdate(db, interaction.user.id, "bday", value);
+            db.collection("profiles").updateOne(
+              { user: interaction.user.id },
+              { $set: { bday: value } }
+            );
             interaction.editReply(
               `Your __birthday__ was updated to **${value}**.`
             );
             if (interaction.options.getInteger("age")) {
-              await dbUpdate(
-                db,
-                interaction.user.id,
-                "age",
-                interaction.options.getInteger("age")
+              db.collection("profiles").updateOne(
+                { user: interaction.user.id },
+                { $set: { age: interaction.options.getInteger("age") } }
               );
               await interaction.editReply(
                 `Your __birthday__ was updated to **${value}**.\nYour __age__ was also updated to **${interaction.options.getInteger(
@@ -704,9 +738,10 @@ module.exports.run = {
                   );
                   return;
                 }
-                await dbUpdate(db, interaction.user.id, "gametag", {
-                  genshin: value,
-                });
+                db.collection("profiles").updateOne(
+                  { user: interaction.user.id },
+                  { $set: { "gametags.genshin": value } }
+                );
                 interaction.editReply(appr);
                 break;
               case "fc":
@@ -716,9 +751,10 @@ module.exports.run = {
                   );
                   return;
                 }
-                await dbUpdate(db, interaction.user.id, "gametag", {
-                  switch: value,
-                });
+                db.collection("profiles").updateOne(
+                  { user: interaction.user.id },
+                  { $set: { "gametags.switch": value } }
+                );
                 interaction.editReply(appr);
                 break;
               case "mc":
@@ -733,7 +769,10 @@ module.exports.run = {
               title: interaction.options.getString("title"),
               desc: interaction.options.getString("contents"),
             };
-            await dbUpdate(db, interaction.user.id, "bio", value);
+            db.collection("profiles").updateOne(
+              { user: interaction.user.id },
+              { $set: { bio: value } }
+            );
             interaction.editReply({
               content: "Your __bio__ was updated.",
               embeds: [
@@ -764,11 +803,9 @@ module.exports.run = {
               if (value.charAt(0) == "#") rolecolour = value.substring(1);
               else rolecolour = value;
             }
-            await dbUpdate(
-              db,
-              interaction.user.id,
-              "colour",
-              parseInt(rolecolour, 16)
+            db.collection("profiles").updateOne(
+              { user: interaction.user.id },
+              { $set: { colour: parseInt(rolecolour, 16) } }
             );
             interaction.editReply({
               embeds: [
@@ -787,7 +824,10 @@ module.exports.run = {
               });
               return;
             }
-            await dbUpdate(db, interaction.user.id, "timezone", value);
+            db.collection("profiles").updateOne(
+              { user: interaction.user.id },
+              { $set: { timezone: value } }
+            );
             interaction.editReply(
               `Your __time zone__ was updated to **tz\`${value}\`**.`
             );
@@ -798,17 +838,24 @@ module.exports.run = {
               interaction.editReply("Your image URL is invalid.");
               return;
             }
-            await dbUpdate(db, interaction.user.id, "image", value);
+            db.collection("profiles").updateOne(
+              { user: interaction.user.id },
+              { $set: { image: value } }
+            );
             interaction.editReply(`Your __image__ was updated to **${value}**`);
             break;
         }
         break;
       case "clear":
-        await interaction.deferReply()
+        await interaction.deferReply({ ephemeral: true });
         result = await dbSearch(db, interaction.user.id);
         if (!result) {
-          interaction.editReply({content: "It seems you do not have a server profile set up.\nWould you like to create one?", components: [setupButton]});
-          return
+          interaction.editReply({
+            content:
+              "It seems you do not have a server profile set up.\nWould you like to create one?",
+            components: [setupButton],
+          });
+          return;
         }
         let field = interaction.options.getString("field");
         let respo = `Your **${field}** was deleted from the profile.`;
@@ -827,41 +874,65 @@ module.exports.run = {
             await interaction.editReply(respo);
             break;
           case "badges":
-            await db.collection("profiles").updateOne({user: interaction.user.id}, {$set: {"pride": []}})
+            await db
+              .collection("profiles")
+              .updateOne(
+                { user: interaction.user.id },
+                { $set: { pride: [] } }
+              );
             await interaction.editReply(respo);
             break;
           case "name":
-            await db.collection("profiles").updateOne({user: interaction.user.id}, {$set: {"name": "Anonymous"}})
+            await db
+              .collection("profiles")
+              .updateOne(
+                { user: interaction.user.id },
+                { $set: { name: "Anonymous" } }
+              );
             await interaction.editReply(respo);
             break;
           case "colour":
-            let user = await interaction.user.fetch(true)
-            await db.collection("profiles").updateOne({user: interaction.user.id}, {$set: {"colour": user.accentColor}})
+            let user = await interaction.user.fetch(true);
+            await db
+              .collection("profiles")
+              .updateOne(
+                { user: interaction.user.id },
+                { $set: { colour: user.accentColor } }
+              );
             await interaction.editReply(respo);
             break;
           case "pronouns":
             await dbClear(db, interaction.user.id, field)
               .then(async () => {
-                let assign: Array<string>
-                
-                let guildMember: GuildMember = await interaction.guild.members.fetch(interaction.user)
-                let roles = guildMember.roles.cache
+                let assign: Array<string> = [];
 
-                if (roles.has("908680453240791048")) assign.push("he/him")
-                if (roles.has("908680453240791047")) assign.push("she/her")
-                if (roles.has("908680453240791047")) assign.push("they/them")
-                if (roles.has("908680453240791045")) assign.push("any/all")
-                if (roles.has("908680453240791044")) assign.push("please ask!")
+                let guildMember: GuildMember =
+                  await interaction.guild.members.fetch(interaction.user);
+                let roles = guildMember.roles.cache;
+
+                if (roles.has("908680453240791048")) assign.push("he/him");
+                if (roles.has("908680453240791047")) assign.push("she/her");
+                if (roles.has("908680453240791046")) assign.push("they/them");
+                if (roles.has("908680453240791045")) assign.push("any/all");
+                if (roles.has("908680453240791044")) assign.push("please ask!");
+
+                // Neopronouns
+                if (roles.has("923067643869679656")) assign.push("mew/mews");
+                if (roles.has("923067492694372412")) assign.push("mo/mos");
 
                 return assign;
               })
               .then(async (roles) => {
                 if (!roles) {
-                  interaction.editReply("It seems you haven't assigned your pronouns in <#908680453366616069>. [Do that first](https://ptb.discord.com/channels/908680453219815514/908680453366616069/908957528208060456) before clearing your pronouns in your server profile.")
-                  return
+                  interaction.editReply(
+                    "It seems you haven't assigned your pronouns in <#908680453366616069>. [Do that first](https://ptb.discord.com/channels/908680453219815514/908680453366616069/908957528208060456) before clearing your pronouns in your server profile."
+                  );
+                  return;
                 }
-
-                await dbUpdate(db, interaction.user.id, "pronouns", roles);
+                db.collection("profiles").updateOne(
+                  { user: interaction.user.id },
+                  { $set: { pronouns: roles } }
+                );
                 await interaction.editReply(
                   "Your pronouns were reset to the ones you obtained in <#908680453366616069>. If your pronouns are incorrect, please [re-assign the correct pronoun roles](https://ptb.discord.com/channels/908680453219815514/908680453366616069/908957528208060456), then run this command again."
                 );
@@ -875,9 +946,11 @@ module.exports.run = {
             );
             break;
           case "gametag":
-            await interaction.editReply(
-              {content: "Choose the game tags you wish to delete. If you changed your mind, just dismiss this message.", components: [gameClearButton]}
-            );
+            await interaction.editReply({
+              content:
+                "Choose the game tags you wish to delete. If you changed your mind, just dismiss this message.",
+              components: [gameClearButton],
+            });
             break;
         }
     }
