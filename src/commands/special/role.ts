@@ -2,7 +2,7 @@
 // Thanks to http://github.com/iwa for the original code!
 
 import { SlashCommandBuilder } from "@discordjs/builders";
-import { CommandInteraction, MessageActionRow, MessageButton } from "discord.js";
+import { MessageActionRow, MessageButton } from "discord.js";
 import { Db } from "mongodb";
 
 const colourButton = new MessageActionRow().addComponents(

@@ -108,12 +108,15 @@ export async function createEmbed(
     let GS = r.gametags.genshin
       ? `**Genshin Impact UID**: ${r.gametags.genshin}\n`
       : "";
+    let FN = r.gametags.fortnite
+      ? `**Fortnite username**: ${r.gametags.fortnite}\n`
+      : "";
     let MC = (result) => {
-      if (!result) return "*Run the `view` command again to see username*";
+      if (!result) return "*Run the `view` command again to see Minecraft username*";
       else if (result == "Unknown") return "";
-      else return `**Minecraft Username**: ${result}`;
+      else return `**Minecraft username**: ${result}`;
     };
-    embed.addField("Game tags", `${NX}${GS}${MC(minecraft)}`);
+    embed.addField("Game tags", `${NX}${GS}${FN}${MC(minecraft)}`);
   }
 
   try {
@@ -246,6 +249,10 @@ const gameClearButton = new MessageActionRow().addComponents(
     .setLabel("Nintendo Switch Friend Code")
     .setStyle("SECONDARY")
     .setCustomId("clearFC"),
+  new MessageButton()
+    .setLabel("Fortnite Username")
+    .setStyle("SECONDARY")
+    .setCustomId("clearFortnite"),
   new MessageButton()
     .setLabel("Minecraft Username")
     .setStyle("SECONDARY")
@@ -600,6 +607,7 @@ module.exports.run = {
         case "clearFC":
         case "clearMC":
         case "clearTag":
+        case "clearFortnite":
           await buttonHelper.clearGametag(interaction, db);
           break;
         case "create":

@@ -1,10 +1,6 @@
 import {
   ButtonInteraction,
-  Client,
-  Guild,
   GuildMember,
-  MessageEmbed,
-  User,
 } from "discord.js";
 import { Db } from "mongodb";
 import * as badgeHelper from "./profile-badge-helper";
@@ -65,31 +61,47 @@ export async function clearGametag(interaction: ButtonInteraction, db: Db) {
     interaction.editReply("There are no gametags to clear!");
     return;
   }
-  if (
-    (interaction.customId == "clearGenshin" && !result.gametags.genshin) ||
-    (interaction.customId == "clearFC" && !result.gametags.switch)
-  ) {
-    interaction.editReply("This gametag has already been cleared.");
-    return;
-  }
   if (interaction.customId == "clearMC") {
     interaction.editReply(
       "Your Minecraft username is linked with Hylybot to ensure you are able to log onto our private Minecraft server.\nIf you wish to remove your Minecraft username, and hence lose access to our Minecraft server, [please contact the Cephalosquad](https://discord.com/channels/908680453219815514/908680453366616068/909038778390298655)."
     );
     return;
   }
-
-  if (interaction.customId == "clearGenshin") {
-    await db
+  let noneExists = "You don't have this gametag. Chances are you've cleared it already."
+  switch (interaction.customId) {
+    case "clearGenshin":
+      if (result.gametags.genshin == null) {
+        await interaction.editReply(noneExists)
+        return
+      }
+      db
       .collection("profiles")
-      .updateOne({ user: interaction.user.id }, { $unset: "gametags.genshin" });
-    interaction.editReply("Your Genshin Impact UID was cleared.");
-  } else {
-    // assume switch friend code
-    await db
+      .updateOne({ user: interaction.user.id }, { $unset: {"gametags.genshin": ""}})
+      .then(async () => await interaction.editReply("Your Genshin Impact UID was cleared."))
+      .catch(async () => await interaction.editReply(noneExists))
+      break      
+    case "clearFortnite":
+      if (result.gametags.fortnite == null) {
+        await interaction.editReply(noneExists)
+        return
+      }
+      db
       .collection("profiles")
-      .updateOne({ user: interaction.user.id }, { $unset: "gametags.switch" });
-    interaction.editReply("Your Nintendo Switch Friend Code was cleared.");
+      .updateOne({ user: interaction.user.id }, { $unset: {"gametags.fortnite": ""}})
+      .then(async () => await interaction.editReply("Your Fortnite username was cleared."))
+      .catch(async () => await interaction.editReply(noneExists))
+      break
+    case "clearFC":
+      if (result.gametags.switch == null) {
+        await interaction.editReply(noneExists)
+        return
+      }
+      db
+      .collection("profiles")
+      .updateOne({ user: interaction.user.id }, { $unset: {"gametags.switch": ""}})
+      .then(async () => await interaction.editReply("Your Nintendo Switch FC was cleared."))
+      .catch(async () => await interaction.editReply(noneExists))
+      break
   }
 }
 
