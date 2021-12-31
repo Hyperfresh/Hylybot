@@ -830,7 +830,7 @@ module.exports.run = {
             value = interaction.options.getString("tz");
             if (!timezone.tz.zone(value)) {
               interaction.editReply({
-                content: `I don't recognize the time zone **tz\`${value}\`**. Please note that **tz** strings are case sensitive.`,
+                content: `I don't recognize the time zone **tz \`${value}\`**. Please note that **tz** strings are case sensitive.`,
                 components: [timezoneButton],
               });
               return;
@@ -840,7 +840,7 @@ module.exports.run = {
               { $set: { timezone: value } }
             );
             interaction.editReply(
-              `Your __time zone__ was updated to **tz\`${value}\`**.`
+              `Your __time zone__ was updated to **tz \`${value}\`**.`
             );
             break;
           case "image":
