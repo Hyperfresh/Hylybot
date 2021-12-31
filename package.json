@@ -4,7 +4,8 @@
   "description": "Yet another custom Discord bot",
   "main": "index.ts",
   "scripts": {
-    "test": "tsc"
+    "build": "tsc",
+    "start": "forever start -m 1 ./build/index.js"
   },
   "repository": {
     "type": "git",
@@ -28,6 +29,7 @@
     "discord-api-types": "^0.25.0",
     "discord.js": "^13.3.1",
     "dotenv": "^10.0.0",
+    "forever": "^4.0.1",
     "image-url-validator": "^1.0.4",
     "js-yaml": "^4.1.0",
     "leaflet": "^1.7.1",
