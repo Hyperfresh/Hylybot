@@ -1,12 +1,15 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
-import { MessageEmbed } from "discord.js";
+import { CommandInteraction, MessageEmbed } from "discord.js";
 import { DateTime } from "luxon";
+import { Db, ObjectId } from "mongodb";
 
 const config = require("../../../data/config");
 
 const fx = require("money");
 const oxr = require("open-exchange-rates");
 oxr.set({ app_id: config.CC_API_KEY });
+const object = new ObjectId(config.CC_OBJECT)
+
 
 module.exports.run = {
   data: new SlashCommandBuilder()
@@ -34,21 +37,21 @@ module.exports.run = {
         )
         .setRequired(false)
     ),
-  async execute(interaction, db) {
+  async execute(interaction: CommandInteraction, db: Db) {
     await interaction.deferReply();
 
     let search = await db
       .collection("currencies")
-      .findOne({_id: "61a84588813893d4c48889c0"})
-    if (Number(search.timestamp) + 10800 >= DateTime.now().toMillis()) {
-      oxr.latest(() => {
+      .findOne({_id: object })
+    if (Number(search.timestamp) + 86400000 <= DateTime.now().toMillis() || search.timestamp == "undefined") {
+      await oxr.latest(async () => {
         const update = {
           rates: oxr.rates,
           base: oxr.base,
           timestamp: String(oxr.timestamp),
         };
-        db.collection("currencies").replaceOne(
-          { _id: "61a84588813893d4c48889c0" },
+        await db.collection("currencies").replaceOne(
+          { _id: object },
           update
         );
         console.log("Currency rates updated");
@@ -76,7 +79,7 @@ module.exports.run = {
         .setAuthor(`${value} ${convertFrom} is`)
         .setTitle(`-> ${result.toFixed(2)} ${convertTo.toUpperCase()}`)
         .setDescription(
-          "Rates are from [Open Exchange Rates](https://openexchangerates.org)."
+          "Rates are from [Open Exchange Rates](https://openexchangerates.org), updated every 24 hours."
         )
         .setFooter("Rates last updated")
         .setTimestamp(Number(search.timestamp));
@@ -84,7 +87,6 @@ module.exports.run = {
     } catch (err) {
       interaction.editReply({
         content: `An error occurred: \`\`\`${err}\`\`\``,
-        ephemeral: true,
       });
     }
   },
@@ -93,5 +95,5 @@ module.exports.run = {
 module.exports.help = {
   name: "cc",
   usage: "/cc <currency> <value> [convert]",
-  desc: "Convert currencies around the world",
+  desc: "Convert currencies around the world. By default, it converts to AUD.",
 };

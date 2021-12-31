@@ -1,5 +1,6 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { exec } from "child_process"
+import { CommandInteraction } from 'discord.js';
 
 module.exports.run = {
     data: new SlashCommandBuilder()
@@ -9,7 +10,7 @@ module.exports.run = {
         option.setName("url")
         .setDescription("(Optional) Enter a URL to check the ping between Hyla's server and the website.")
         .setRequired(false)),
-    async execute(interaction) {
+    async execute(interaction: CommandInteraction) {
         if (interaction.options.getString("url")) {
             await interaction.deferReply()
             exec(`ping -c 4 ${interaction.options.getString("url")}`, (err, stdout, stderr) => {

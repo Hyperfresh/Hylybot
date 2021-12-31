@@ -7,11 +7,12 @@
         {
             "type": "pwa-node",
             "request": "launch",
-            "name": "Run Hylybot",
+            "name": "Run Hylybot (TS way)",
             "skipFiles": [
                 "<node_internals>/**"
             ],
-            "program": "${workspaceFolder}/build/index.js",
+            "program": "${workspaceFolder}/src/index.ts",
+            "preLaunchTask": "tsc: build - tsconfig.json",
             "outFiles": [
                 "${workspaceFolder}/**/*.js"
             ]

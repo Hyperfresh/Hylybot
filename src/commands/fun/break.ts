@@ -1,4 +1,5 @@
 import { SlashCommandBuilder } from "@discordjs/builders"
+import { CommandInteraction } from "discord.js"
 
 let breakMessages = [
     'oh no you have broken me!',
@@ -12,8 +13,8 @@ module.exports.run = {
     data: new SlashCommandBuilder()
     .setName("break")
     .setDescription("I'm looking at you, Octolili."),
-    async execute(interaction) {
-        let item = Math.random() * 4
+    async execute(interaction: CommandInteraction) {
+        let item = Math.random() * (breakMessages.length - 1)
         interaction.reply(`${breakMessages[item.toFixed(0)]}`)
     }
 }
