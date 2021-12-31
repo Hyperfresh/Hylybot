@@ -101,14 +101,20 @@ export async function createEmbed(
   } else {
     minecraft = await parseMinecraft(r.gametags.mc);
   }
-  embed.addField(
-    "Game tags",
-    `**Nintendo Switch FC**: ${
-      r.gametags.switch ? r.gametags.switch : "Unknown"
-    }\n**Genshin Impact UID**: ${
-      r.gametags.genshin ? r.gametags.genshin : "Unknown"
-    }\n**Minecraft Username**: ${minecraft}`
-  );
+  if (minecraft != "Unknown" || r.gametags.switch || r.gametags.genshin) {
+    let NX = r.gametags.switch
+      ? `**Nintendo Switch FC**: ${r.gametags.switch}\n`
+      : "";
+    let GS = r.gametags.genshin
+      ? `**Genshin Impact UID**: ${r.gametags.genshin}\n`
+      : "";
+    let MC = (result) => {
+      if (!result) return "*Run the `view` command again to see username*";
+      else if (result == "Unknown") return "";
+      else return `**Minecraft Username**: ${result}`;
+    };
+    embed.addField("Game tags", `${NX}${GS}${MC(minecraft)}`);
+  }
 
   try {
     if (r.image !== null) embed.setImage(r.image);
@@ -125,17 +131,6 @@ async function dbSearch(
   return db.collection("profiles").findOne({
     user: search,
   });
-}
-
-async function dbClear(db: Db, search: string, item: string) {
-  db.collection("profiles").updateOne(
-    {
-      user: search,
-    },
-    {
-      $set: { item: null },
-    }
-  );
 }
 
 // Pride badge buttons
@@ -405,7 +400,7 @@ module.exports.run = {
                 option
                   .setName("value")
                   .setDescription(
-                    "The name you want to display on your profile."
+                    "Your (full) IRL name is preferred, but online names are fine as well."
                   )
                   .setRequired(true)
               )
@@ -471,6 +466,7 @@ module.exports.run = {
                   .setName("item")
                   .setDescription("Which game or console?")
                   .setRequired(true)
+                  .addChoice("Fortnite", "fortnite")
                   .addChoice("Genshin Impact", "genshin")
                   .addChoice("Nintendo Switch", "switch")
                   .addChoice("Minecraft", "mc")
@@ -478,7 +474,7 @@ module.exports.run = {
               .addStringOption((option) =>
                 option
                   .setName("tag")
-                  .setDescription("Your FC or UID goes here.")
+                  .setDescription("Your FC, username or UID goes here.")
                   .setRequired(true)
               )
         )
@@ -744,7 +740,7 @@ module.exports.run = {
                 );
                 interaction.editReply(appr);
                 break;
-              case "fc":
+              case "switch":
                 if (!/(SW-\d{4}-\d{4}-\d{4})/.test(value)) {
                   interaction.editReply(
                     `${deny} Switch friend codes must include the \`SW-\` at the beginning.`
@@ -761,6 +757,13 @@ module.exports.run = {
                 interaction.editReply({
                   embeds: [setupMinecraft],
                 });
+                break;
+              case "fortnite":
+                db.collection("profiles").updateOne(
+                  { user: interaction.user.id },
+                  { $set: { "gametags.fortnite": value } }
+                );
+                interaction.editReply(appr);
                 break;
             }
             break;
@@ -867,10 +870,39 @@ module.exports.run = {
             await interaction.editReply("Your profile was deleted.");
             break;
           case "age":
+            await db
+              .collection("profiles")
+              .updateOne(
+                { user: interaction.user.id },
+                { $set: { age: "unknown" } }
+              );
+            await interaction.editReply(respo);
+            break;
           case "bio":
+            await db
+              .collection("profiles")
+              .updateOne(
+                { user: interaction.user.id },
+                { $set: { bio: null } }
+              );
+            await interaction.editReply(respo);
+            break;
           case "timezone":
+            await db
+              .collection("profiles")
+              .updateOne(
+                { user: interaction.user.id },
+                { $set: { timezone: null } }
+              );
+            await interaction.editReply(respo);
+            break;
           case "image":
-            await dbClear(db, interaction.user.id, field);
+            await db
+              .collection("profiles")
+              .updateOne(
+                { user: interaction.user.id },
+                { $set: { image: null } }
+              );
             await interaction.editReply(respo);
             break;
           case "badges":
@@ -902,7 +934,12 @@ module.exports.run = {
             await interaction.editReply(respo);
             break;
           case "pronouns":
-            await dbClear(db, interaction.user.id, field)
+            await db
+              .collection("profiles")
+              .updateOne(
+                { user: interaction.user.id },
+                { $set: { pronouns: null } }
+              )
               .then(async () => {
                 let assign: Array<string> = [];
 
@@ -939,8 +976,12 @@ module.exports.run = {
               });
             break;
           case "bday":
-            await dbClear(db, interaction.user.id, "age");
-            await dbClear(db, interaction.user.id, "bday");
+            await db
+              .collection("profiles")
+              .updateOne(
+                { user: interaction.user.id },
+                { $set: { bday: "Unknown", age: "unknown" } }
+              );
             await interaction.editReply(
               "Your birthday and age was cleared from your profile."
             );

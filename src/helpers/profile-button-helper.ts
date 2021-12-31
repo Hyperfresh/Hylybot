@@ -139,7 +139,8 @@ export async function setupProfile(interaction: ButtonInteraction, db: Db) {
     gametags: {
       genshin: null,
       mc: null,
-      switch: null
+      switch: null,
+      fortnite: null
     },
     image: user.bannerURL({ dynamic: true }),
     usertag: interaction.user.tag,
