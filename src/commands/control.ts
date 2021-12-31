@@ -1,6 +1,6 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
 import { exec } from "child_process";
-// import ready from "../events/ready"
+import { CommandInteraction } from "discord.js";
 let config = require("../../data/config");
 
 module.exports.run = {
@@ -17,7 +17,7 @@ module.exports.run = {
         .addChoice("Update Git", "git")
         .addChoice("Update NPM", "npm")
     ),
-  async execute(interaction) {
+  async execute(interaction: CommandInteraction) {
     if (!config.OWNER_ID.includes(interaction.user.id)) {
       interaction.reply({
         content: `Nice try, ${interaction.user.username}...`,
@@ -31,7 +31,7 @@ module.exports.run = {
     switch (interaction.options.getString("command")) {
       case "stop":
         await interaction.reply("🛑 > Shutting down.");
-        await interaction.client.user.setStatus("invisible");
+        interaction.client.user.setStatus("invisible");
         setTimeout(() => {
           interaction.client.destroy();
           process.exit();
@@ -49,13 +49,11 @@ module.exports.run = {
         exec(`npm i ; npm ci ; npm audit`, (err, stdout, stderr) => {
           if (err || stderr)
             interaction.editReply({
-              content: `An error occurred. \`\`\`Err: ${err}\n---\nStdrr: ${stderr}\`\`\``,
-              ephemeral: true,
+              content: `An error occurred. \`\`\`Err: ${err}\n---\nStdrr: ${stderr}\`\`\``
             });
           else
             interaction.editReply({
               content: `\`\`\`${stdout}\`\`\``,
-              ephemeral: true,
             });
         });
         break;
@@ -65,12 +63,10 @@ module.exports.run = {
           if (err || stderr)
             interaction.editReply({
               content: `An error occurred. \`\`\`Err: ${err}\n---\nStdrr: ${stderr}\`\`\``,
-              ephemeral: true,
             });
           else
             interaction.editReply({
               content: `\`\`\`${stdout}\`\`\``,
-              ephemeral: true,
             });
         });
         break;
