@@ -68,7 +68,7 @@ module.exports.run = {
         );
         break;
       case "switch":
-        if (!result.gametags.genshin) {
+        if (!result.gametags.switch) {
           notThere(interaction, user);
           return;
         }
