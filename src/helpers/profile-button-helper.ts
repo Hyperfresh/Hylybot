@@ -154,8 +154,11 @@ export async function setupProfile(interaction: ButtonInteraction, db: Db) {
       switch: null,
       fortnite: null
     },
-    image: user.bannerURL({ dynamic: true }),
-    usertag: interaction.user.tag,
+    image: user.bannerURL({ dynamic: true, size: 1024 }),
+    avatar: user.avatarURL({
+      dynamic: true,
+      size: 1024,
+    }) 
   });
 
   let embed = await createEmbed(

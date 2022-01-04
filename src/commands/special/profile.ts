@@ -49,20 +49,15 @@ export async function createEmbed(
     .toLocaleString(DateTime.DATETIME_MED);
   console.log(r);
   let embed = new MessageEmbed()
-    .setTitle(r.name)
+    .setTitle(`**${r.name}**`)
     .setColor(r.colour)
     .setDescription(
       `**Pronouns**: ${r.pronouns}\n**Birthday**: ${r.bday} (age ${
         r.age ? r.age : "unknown"
       })`
     )
-    .setThumbnail(
-      user.avatarURL({
-        dynamic: true,
-        size: 1024,
-      })
-    )
-    .setAuthor(r.usertag)
+    .setThumbnail(r.avatar)
+    .setAuthor(String(user.username))
     .addField(
       "Game Interests & Hobbies",
       await badgeHelper.spaceout(
@@ -112,7 +107,8 @@ export async function createEmbed(
       ? `**Fortnite username**: ${r.gametags.fortnite}\n`
       : "";
     let MC = (result) => {
-      if (!result) return "*Run the `view` command again to see Minecraft username*";
+      if (!result)
+        return "*Run the `view` command again to see Minecraft username*";
       else if (result == "Unknown") return "";
       else return `**Minecraft username**: ${result}`;
     };
@@ -379,6 +375,19 @@ module.exports.run = {
       group
         .setName("edit")
         .setDescription("Edit your server profile.")
+        .addSubcommand((subcommand) =>
+          subcommand
+            .setName("avatar")
+            .setDescription("Set the avatar on your profile.")
+            .addStringOption((option) =>
+              option
+                .setName("url")
+                .setDescription(
+                  "Would you like to set a different avatar? Otherwise, I'll use your Discord avatar."
+                )
+                .setRequired(false)
+            )
+        )
         .addSubcommand((subcommand) =>
           subcommand
             .setName("pronouns")
@@ -671,6 +680,16 @@ module.exports.run = {
         }
         let value;
         switch (interaction.options.getSubcommand()) {
+          case "avatar":
+            value = interaction.options.getString("url")
+            if (!value) value = interaction.user.avatarURL({ dynamic: true, size: 1024 })
+            if (!isImageURL(value)) {
+              interaction.editReply("Your image URL is invalid.");
+              return;
+            }
+            await db.collection("profiles").updateOne({user: interaction.user.id}, {$set: {avatar: value}})
+            interaction.editReply(`Your __avatar__ was updated to ** ${value} **`);
+            break
           case "pronouns":
             value = interaction.options.getString("pronoun");
             await db
@@ -853,7 +872,7 @@ module.exports.run = {
               { user: interaction.user.id },
               { $set: { image: value } }
             );
-            interaction.editReply(`Your __image__ was updated to **${value}**`);
+            interaction.editReply(`Your __image__ was updated to ** ${value} **`);
             break;
         }
         break;
