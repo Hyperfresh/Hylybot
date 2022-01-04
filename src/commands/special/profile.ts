@@ -57,7 +57,7 @@ export async function createEmbed(
       })`
     )
     .setThumbnail(r.avatar)
-    .setAuthor(String(user.username))
+    .setAuthor(String(user.tag))
     .addField(
       "Game Interests & Hobbies",
       await badgeHelper.spaceout(
