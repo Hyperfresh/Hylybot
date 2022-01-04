@@ -96,7 +96,7 @@ export async function createEmbed(
   } else {
     minecraft = await parseMinecraft(r.gametags.mc);
   }
-  if (minecraft != "Unknown" || r.gametags.switch || r.gametags.genshin) {
+  if (minecraft != "Unknown" || r.gametags.switch || r.gametags.genshin || r.gametags.fortnite ) {
     let NX = r.gametags.switch
       ? `**Nintendo Switch FC**: ${r.gametags.switch}\n`
       : "";
