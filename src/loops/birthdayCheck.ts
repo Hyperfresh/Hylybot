@@ -44,7 +44,7 @@ export default async function birthdayCheck(db: Db, bot: Client) {
                 embed.setDescription(`<@!${userInfo.id}> was born on ${todayString}.`)
                 embed.setColor('#FFFF72')
                 embed.setThumbnail(userInfo.user.avatarURL({dynamic: true, size: 128 }))
-                if (user.age != "unknown") {
+                if (user.age != null) {
                     embed.setFooter(`${nameArray[0]} turned ${user.age + 1} today!`)
                     await db.collection("profiles").updateOne({user: userInfo.id}, {$inc: {age: 1}})
                 }
