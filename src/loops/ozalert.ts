@@ -3,8 +3,7 @@ import { MongoClient } from "mongodb";
 
 import * as rssparserlib from "rss-parser";
 const rssparser = new rssparserlib();
-import { Parser } from "xml2js";
-const xmlparser = new Parser();
+import { parseStringPromise } from "xml2js";
 
 const config = require("../../data/config");
 
@@ -17,7 +16,7 @@ import { DateTime } from "luxon";
 async function parseAlerts(results) {
   // asynchronous function
   for (let num of results) {
-    xmlparser.parseStringPromise(num.content).then(function (result) {
+    parseStringPromise(num.content).then(function (result) {
       // First set variables, dates
       let alert = result.div.alert[0].info[0];
       let issued = DateTime.fromISO(result.div.alert[0].sent[0])
@@ -149,8 +148,7 @@ async function createMap(item: any) {
 
 async function parseAlert(bot: Client, results: any) {
   for (let num of results) {
-    xmlparser
-      .parseStringPromise(num.content)
+    parseStringPromise(num.content)
       .then(function (result) {
         // First set variables, dates
         let alert = result.div.alert[0].info[0];
