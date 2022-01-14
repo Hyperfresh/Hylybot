@@ -28,7 +28,7 @@
     "@types/xml2js": "^0.4.9",
     "discord-api-types": "^0.26.1",
     "discord.js": "^13.6.0",
-    "dotenv": "^10.0.0",
+    "dotenv": "^11.0.0",
     "image-url-validator": "^1.0.4",
     "js-yaml": "^4.1.0",
     "leaflet": "^1.7.1",
