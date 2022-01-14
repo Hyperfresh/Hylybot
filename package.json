@@ -21,7 +21,6 @@
     "@discordjs/builders": "^0.11.0",
     "@discordjs/rest": "^0.2.0-canary.0",
     "@types/js-yaml": "^4.0.5",
-    "@types/leaflet": "^1.7.7",
     "@types/luxon": "^2.0.9",
     "@types/node": "^16.11.17",
     "@types/ping": "^0.4.1",
