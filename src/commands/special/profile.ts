@@ -52,12 +52,12 @@ export async function createEmbed(
     .setTitle(`**${r.name}**`)
     .setColor(r.colour)
     .setDescription(
-      `**Pronouns**: ${r.pronouns}\n**Birthday**: ${r.bday} (age ${
+      `**Pronouns**: ${r.pronouns.join(", ")}\n**Birthday**: ${r.bday} (age ${
         r.age ? r.age : "unknown"
       })`
     )
     .setThumbnail(r.avatar)
-    .setAuthor(String(user.tag))
+    .setAuthor({name: String(user.tag)})
     .addField(
       "Game Interests & Hobbies",
       await badgeHelper.spaceout(
@@ -80,7 +80,7 @@ export async function createEmbed(
         : "No badges",
       true
     )
-    .setFooter(`Member ID: ${r.user}`);
+    .setFooter({text: `Member ID: ${r.user}`});
   if (r.timezone != null)
     embed.addField(
       `The time for me is ${time}.`,
