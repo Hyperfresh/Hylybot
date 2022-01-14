@@ -34,78 +34,106 @@ function titleCase(str) {
  * @returns MessageEmbed
  */
 async function returnWeatherEmbed(measure: string, location: string) {
-    let temp = measure == "metric" ? "℃" : "℉";
+  let temp = measure == "metric" ? "℃" : "℉";
 
-    let embed = new MessageEmbed();
-    let coords: Array<number> = [0, 0];
-    await fetch(
-      `https://api.openweathermap.org/data/2.5/weather?q=${location}&appid=${config.WEATHER_KEY}&units=${measure}`
-    )
-      .then((res) => res.json())
-      .then((data: any) => {
-        console.log("Retrieved weather data.", data)
-        coords = [data.coord.lat, data.coord.lon];
-        let windSpeed =
+  let embed = new MessageEmbed();
+  let coords: Array<number> = [0, 0];
+  await fetch(
+    `https://api.openweathermap.org/data/2.5/weather?q=${location}&appid=${config.WEATHER_KEY}&units=${measure}`
+  )
+    .then((res) => res.json())
+    .then((data: any) => {
+      console.log("Retrieved weather data.", data);
+      coords = [data.coord.lat, data.coord.lon];
+      let windSpeed =
+        measure == "metric"
+          ? `${(data.wind.speed * (18 / 5)).toFixed(2)}km/h`
+          : `${data.wind.speed.toFixed(2)}mph`;
+      let windGust =
+        measure == "metric"
+          ? `${(data.wind.gust * (18 / 5)).toFixed(2)}km/h`
+          : `${data.wind.gust.toFixed(2)}mph`;
+      let rain: any;
+      if (data.rain) {
+        rain =
           measure == "metric"
-            ? `${(data.wind.speed * (18 / 5)).toFixed(2)}km/h`
-            : `${data.wind.speed.toFixed(2)}mph`;
-        let windGust =
-          measure == "metric"
-            ? `${(data.wind.gust * (18 / 5)).toFixed(2)}km/h`
-            : `${data.wind.gust.toFixed(2)}mph`;
-        let rain: any;
-        if (data.rain) {
-          rain =
-            measure == "metric"
-              ? `${data.rain["3h"].toFixed(2)}mm`
-              : `${(data.rain["3h"] * 0.03937).toFixed(2)}in`;
-        } else {
-          rain = "no rain";
-        }
-        embed
-          .setAuthor({name: `${data.name}, ${data.sys.country}`})
-          .setTitle(titleCase(data.weather[0].description))
-          .setDescription(
-            `> **Currently, it's ${data.main.temp.toFixed(0)}${temp}**. (Feels like ${data.main.feels_like.toFixed(0)}${temp} | <:high:931085546338545684> ${data.main.temp_max.toFixed(0)}${temp} | <:low:931085579939106826> ${data.main.temp_min.toFixed(0)}${temp})\n♨ **Humidity**: ${data.main.humidity}%\n☁️ **Cloud cover**: ${data.clouds.all}%\n💨 **Wind**: ${windSpeed} winds @ ${data.wind.deg}° (${windGust} gusts)\n🌧 **Rain**: ${rain} recorded over the past 3 hours\n**Sunrise & sunset**: 🔺 <t:${data.sys.sunrise}:t> 🔻 <t:${data.sys.sunset}:t>`
+            ? `${data.rain["3h"].toFixed(2)}mm`
+            : `${(data.rain["3h"] * 0.03937).toFixed(2)}in`;
+      } else {
+        rain = "no rain";
+      }
+      embed
+        .setAuthor({ name: `${data.name}, ${data.sys.country}` })
+        .setTitle(titleCase(data.weather[0].description))
+        .setDescription(
+          `> **Currently, it's ${data.main.temp.toFixed(
+            0
+          )}${temp}**. (Feels like ${data.main.feels_like.toFixed(
+            0
+          )}${temp} | <:high:931085546338545684> ${data.main.temp_max.toFixed(
+            0
+          )}${temp} | <:low:931085579939106826> ${data.main.temp_min.toFixed(
+            0
+          )}${temp})\n♨ **Humidity**: ${
+            data.main.humidity
+          }%\n☁️ **Cloud cover**: ${
+            data.clouds.all
+          }%\n💨 **Wind**: ${windSpeed} winds @ ${
+            data.wind.deg
+          }° (${windGust} gusts)\n🌧 **Rain**: ${rain} recorded over the past 3 hours\n**Sunrise & sunset**: 🔺 <t:${
+            data.sys.sunrise
+          }:t> 🔻 <t:${data.sys.sunset}:t>`
+        )
+        .setThumbnail(
+          `http://openweathermap.org/img/wn/${data.weather[0].icon}@2x.png`
+        )
+        .setFooter({ text: "Data from OpenWeatherMap" })
+        .setTimestamp();
+    })
+    .catch((err) => {
+      embed
+        .setTitle(
+          "An error occurred at `fetch weather`. Please report this to the bot maintainer."
+        )
+        .setDescription(String(err));
+    });
+  await fetch(
+    `https://api.openweathermap.org/data/2.5/onecall?lat=${coords[0]}&lon=${coords[1]}&exclude=current,minutely,hourly&units=${measure}&appid=${config.WEATHER_KEY}`
+  )
+    .then((res) => res.json())
+    .then((data) => {
+      console.log("Retrieved onecall data.", data);
+      if (data.alerts) {
+        data.alerts.forEach((item) =>
+          embed.addField(
+            `⚠️ WEATHER ALERT: ${item.event}`,
+            `**Issued by ${item.sender_name} at <t:${item.start}:f> | Expires at <t:${item.end}:f>**\n${item.description}`
           )
-          .setThumbnail(
-            `http://openweathermap.org/img/wn/${data.weather[0].icon}@2x.png`
-          )
-          .setFooter({ text: "Data from OpenWeatherMap" })
-          .setTimestamp();
-      })
-      .catch((err) => {
-        embed.setTitle("An error occurred at `fetch weather`. Please report this to the bot maintainer.")
-      .setDescription(String(err))
-      });;
-    await fetch(
-      `https://api.openweathermap.org/data/2.5/onecall?lat=${coords[0]}&lon=${coords[1]}&exclude=current,minutely,hourly&units=${measure}&appid=${config.WEATHER_KEY}`
-    )
-      .then((res) => res.json())
-      .then((data) => {
-        console.log("Retrieved onecall data.", data)
-        if (data.alerts) {
-          data.alerts.forEach((item) =>
-            embed.addField(
-              `⚠️ WEATHER ALERT: ${item.event}`,
-              `**Issued by ${item.sender_name} at <t:${item.start}:f> | Expires at <t:${item.end}:f>**\n${item.description}`
-            )
-          );
-        }
-        let forecast: Array<string> = []
-        data.daily.forEach((item) => {
-          let thisDay = DateTime.fromSeconds(item.dt).toFormat("cccc d LLL");
-          forecast.push(
-            `**${thisDay}**: ${item.weather[0].description} (<:high:931085546338545684> ${item.temp.max.toFixed(0)}${temp} | <:low:931085579939106826> ${item.temp.min.toFixed(0)}${temp})\n`
-          );
-        });
-        embed.addField("Forecast", forecast.join(""));
-      })
-      .catch((err) => {
-          embed.setTitle("An error occurred at `fetch onecall`. Please report this to the bot maintainer.")
-        .setDescription(String(err))
-        });
-    return embed
+        );
+      }
+      let forecast: Array<string> = [];
+      data.daily.forEach((item) => {
+        let thisDay = DateTime.fromSeconds(item.dt).toFormat("cccc d LLL");
+        forecast.push(
+          `**${thisDay}**: ${
+            item.weather[0].description
+          } (<:high:931085546338545684> ${item.temp.max.toFixed(
+            0
+          )}${temp} | <:low:931085579939106826> ${item.temp.min.toFixed(
+            0
+          )}${temp})\n`
+        );
+      });
+      embed.addField("Forecast", forecast.join(""));
+    })
+    .catch((err) => {
+      embed
+        .setTitle(
+          "An error occurred at `fetch onecall`. Please report this to the bot maintainer."
+        )
+        .setDescription(String(err));
+    });
+  return embed;
 }
 
 module.exports.run = {
@@ -198,7 +226,7 @@ module.exports.run = {
       switch (interaction.options.getSubcommand()) {
         case "view":
           await interaction.deferReply();
-          if (lastRun.plus({minutes: 1}) > DateTime.now()) {
+          if (lastRun.plus({ minutes: 1 }) > DateTime.now()) {
             interaction.editReply({
               content: "⏳ **Slow down!**",
               embeds: [cooldownEmbed],
@@ -223,8 +251,11 @@ module.exports.run = {
           }
           let measure = interaction.options.getString("measurement");
           if (!measure) measure = "metric";
-          let embed = await returnWeatherEmbed(measure, result.location)
-          interaction.editReply({ content: `Here's the weather for **${user.username}**.`, embeds: [embed] });
+          let embed = await returnWeatherEmbed(measure, result.location);
+          interaction.editReply({
+            content: `Here's the weather for **${user.username}**.`,
+            embeds: [embed],
+          });
           break;
         case "set":
           await interaction.deferReply({ ephemeral: true });
@@ -253,7 +284,7 @@ module.exports.run = {
       }
     } else {
       await interaction.deferReply();
-      if (lastRun.plus({minutes: 1}) > DateTime.now()) {
+      if (lastRun.plus({ minutes: 1 }) > DateTime.now()) {
         interaction.editReply({
           content: "⏳ **Slow down!**",
           embeds: [cooldownEmbed],
@@ -265,8 +296,11 @@ module.exports.run = {
       let location = `${interaction.options.getString(
         "city"
       )}, ${interaction.options.getString("country")}`;
-      let embed = await returnWeatherEmbed(measure, location)
-      await interaction.editReply({ content: `Here's the weather for **${location}**.`, embeds: [embed] });
+      let embed = await returnWeatherEmbed(measure, location);
+      await interaction.editReply({
+        content: `Here's the weather for **${location}**.`,
+        embeds: [embed],
+      });
     }
   },
 };

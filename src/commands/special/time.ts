@@ -1,16 +1,20 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
-import { CommandInteraction, MessageActionRow, MessageButton } from "discord.js";
+import {
+  CommandInteraction,
+  MessageActionRow,
+  MessageButton,
+} from "discord.js";
 import { DateTime } from "luxon";
 import { Db } from "mongodb";
 
-import * as timezone from "moment-timezone"
+import * as timezone from "moment-timezone";
 
 const timezoneButton = new MessageActionRow().addComponents(
-    new MessageButton()
-      .setLabel("View valid time zones")
-      .setURL("https://en.wikipedia.org/wiki/List_of_tz_database_time_zones")
-      .setStyle("LINK")
-  );
+  new MessageButton()
+    .setLabel("View valid time zones")
+    .setURL("https://en.wikipedia.org/wiki/List_of_tz_database_time_zones")
+    .setStyle("LINK")
+);
 
 module.exports.run = {
   data: new SlashCommandBuilder()
@@ -52,17 +56,26 @@ module.exports.run = {
       }
       let nameResult: string = result.name;
       let nameArray: Array<string> = nameResult.split(" ");
-      interaction.editReply(`**${nameArray[0]}**'s time is ${DateTime.now().setZone(result.timezone).toLocaleString(DateTime.DATETIME_MED)}. (tz \`${result.timezone}\`)`)
-    } else { // Assume timezone
-        let value = interaction.options.getString("where")
-        if (!timezone.tz.zone(value)) {
-            interaction.editReply({
-                content: `I don't recognize the time zone **tz \`${value}\`**. Please note that **tz** strings are case sensitive.`,
-                components: [timezoneButton],
-              });
-              return;
-        }
-        interaction.editReply(`The time in **tz \`${value}\`** is ${DateTime.now().setZone(value).toLocaleString(DateTime.DATETIME_MED)}.`)
+      interaction.editReply(
+        `**${nameArray[0]}**'s time is ${DateTime.now()
+          .setZone(result.timezone)
+          .toLocaleString(DateTime.DATETIME_MED)}. (tz \`${result.timezone}\`)`
+      );
+    } else {
+      // Assume timezone
+      let value = interaction.options.getString("where");
+      if (!timezone.tz.zone(value)) {
+        interaction.editReply({
+          content: `I don't recognize the time zone **tz \`${value}\`**. Please note that **tz** strings are case sensitive.`,
+          components: [timezoneButton],
+        });
+        return;
+      }
+      interaction.editReply(
+        `The time in **tz \`${value}\`** is ${DateTime.now()
+          .setZone(value)
+          .toLocaleString(DateTime.DATETIME_MED)}.`
+      );
     }
   },
 };

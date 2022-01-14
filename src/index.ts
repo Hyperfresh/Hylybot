@@ -92,12 +92,32 @@ bot.on("interactionCreate", async (interaction) => {
   let mongod = await MongoClient.connect(url);
   let db = mongod.db(dbName);
 
-  if (config.DEV_MODE && !config.OWNER_ID.includes(interaction.user.id)) return
+  if (config.DEV_MODE && !config.OWNER_ID.includes(interaction.user.id)) return;
 
   if (interaction.isButton()) {
-    let profileButtonID = ["viewPride", "gay", "lesbian", "bi","pan",
-  "ace","aro","trans","enby","agender","gq","catgender","ally","nd","clearPride",
-"clearGenshin", "clearFC", "clearMC", "clearFortnite", "clearTag","create"]
+    let profileButtonID = [
+      "viewPride",
+      "gay",
+      "lesbian",
+      "bi",
+      "pan",
+      "ace",
+      "aro",
+      "trans",
+      "enby",
+      "agender",
+      "gq",
+      "catgender",
+      "ally",
+      "nd",
+      "clearPride",
+      "clearGenshin",
+      "clearFC",
+      "clearMC",
+      "clearFortnite",
+      "clearTag",
+      "create",
+    ];
     if (
       interaction.customId == "preCol" ||
       interaction.customId == "reassign"
@@ -106,8 +126,8 @@ bot.on("interactionCreate", async (interaction) => {
       command.run.execute(interaction, db);
     }
     if (profileButtonID.includes(interaction.customId)) {
-      let command = commands.get("profile")
-      command.run.execute(interaction, db)
+      let command = commands.get("profile");
+      command.run.execute(interaction, db);
     }
   }
   if (interaction.isCommand()) {
@@ -127,11 +147,11 @@ bot.on("interactionCreate", async (interaction) => {
 });
 
 // Check if it's someone's birthday, and send a message at 7am server time
-import birthdayCheck from './loops/birthdayCheck';
+import birthdayCheck from "./loops/birthdayCheck";
 setInterval(async () => {
   let mongod = await MongoClient.connect(url);
   let db = mongod.db(dbName);
-  await birthdayCheck(db, bot)
+  await birthdayCheck(db, bot);
 }, 3600000);
 
 // import OzAlertFetch from "./loops/ozalert"

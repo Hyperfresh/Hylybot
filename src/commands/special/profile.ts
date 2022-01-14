@@ -57,7 +57,7 @@ export async function createEmbed(
       })`
     )
     .setThumbnail(r.avatar)
-    .setAuthor({name: String(user.tag)})
+    .setAuthor({ name: String(user.tag) })
     .addField(
       "Game Interests & Hobbies",
       await badgeHelper.spaceout(
@@ -80,7 +80,7 @@ export async function createEmbed(
         : "No badges",
       true
     )
-    .setFooter({text: `Member ID: ${r.user}`});
+    .setFooter({ text: `Member ID: ${r.user}` });
   if (r.timezone != null)
     embed.addField(
       `The time for me is ${time}.`,
@@ -96,7 +96,12 @@ export async function createEmbed(
   } else {
     minecraft = await parseMinecraft(r.gametags.mc);
   }
-  if (minecraft != "Unknown" || r.gametags.switch || r.gametags.genshin || r.gametags.fortnite ) {
+  if (
+    minecraft != "Unknown" ||
+    r.gametags.switch ||
+    r.gametags.genshin ||
+    r.gametags.fortnite
+  ) {
     let NX = r.gametags.switch
       ? `**Nintendo Switch FC**: ${r.gametags.switch}\n`
       : "";
@@ -681,15 +686,23 @@ module.exports.run = {
         let value;
         switch (interaction.options.getSubcommand()) {
           case "avatar":
-            value = interaction.options.getString("url")
-            if (!value) value = interaction.user.avatarURL({ dynamic: true, size: 1024 })
+            value = interaction.options.getString("url");
+            if (!value)
+              value = interaction.user.avatarURL({ dynamic: true, size: 1024 });
             if (!isImageURL(value)) {
               interaction.editReply("Your image URL is invalid.");
               return;
             }
-            await db.collection("profiles").updateOne({user: interaction.user.id}, {$set: {avatar: value}})
-            interaction.editReply(`Your __avatar__ was updated to ** ${value} **`);
-            break
+            await db
+              .collection("profiles")
+              .updateOne(
+                { user: interaction.user.id },
+                { $set: { avatar: value } }
+              );
+            interaction.editReply(
+              `Your __avatar__ was updated to ** ${value} **`
+            );
+            break;
           case "pronouns":
             value = interaction.options.getString("pronoun");
             await db
@@ -872,7 +885,9 @@ module.exports.run = {
               { user: interaction.user.id },
               { $set: { image: value } }
             );
-            interaction.editReply(`Your __image__ was updated to ** ${value} **`);
+            interaction.editReply(
+              `Your __image__ was updated to ** ${value} **`
+            );
             break;
         }
         break;
