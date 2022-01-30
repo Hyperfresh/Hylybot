@@ -1,7 +1,6 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
 import { CommandInteraction } from "discord.js";
-let config = require("../../data/config");
-
+import { config } from "..";
 import { Bash } from "node-bash";
 import { PowerShell } from "node-powershell";
 

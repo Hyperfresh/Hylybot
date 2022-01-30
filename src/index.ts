@@ -38,10 +38,10 @@ const commands: Discord.Collection<any, any> = new Discord.Collection();
 
 import * as fs from "fs";
 
-import {jsonc} from "jsonc"
-let configData = fs.readFileSync("./data/config.jsonc", "utf8")
-let config = jsonc.parse(configData)
-export { config }
+import { jsonc } from "jsonc";
+let configData = fs.readFileSync("./data/config.jsonc", "utf8");
+let config = jsonc.parse(configData);
+export { config };
 
 import { MongoClient } from "mongodb";
 const url = config.MONGO_URL,
@@ -79,28 +79,43 @@ fs.readdir("./build/commands/", { withFileTypes: true }, (error, f) => {
 });
 
 bot.on("shardReady", async () => {
-  // Set permissions...
+  console.log(`✅ > ${bot.user.username} is ready for action!`);
+  await ready(bot, config.DEV_MODE);
 
-  let guild = await bot.guilds.fetch(config.GUILD_ID)
-  guild.commands.cache.forEach(item => {
-    switch (item.name) {
-      case "bot":
-        item.setDefaultPermission(false)
-        item.permissions.set({permissions: [{id: "", type: "ROLE", permission: true}]})
-        break
-    }
-  })
-
+  // Push commands...
   const rest = new REST({ version: "9" }).setToken(config.BOT_TOKEN);
-  rest
+  await rest
     .put(Routes.applicationGuildCommands(config.CLIENT_ID, config.GUILD_ID), {
       body: commandsToPush,
     })
-    .then(() => console.log("Pushed commands."))
+    .then(() => {
+      console.log("Pushed commands.")
+    })
+    .then(() => {
+      console.log("Attempting to set permissions...")
+      setTimeout(async () => {
+        let guild = bot.guilds.cache.find((val) => val.id == config.GUILD_ID);
+        let commandos = guild.commands.fetch();
+        (await commandos).forEach((item) => {
+          console.log(`Setting permissions for command ${item.name}...`)
+          switch (item.name) {
+            case "bot":
+              item.setDefaultPermission(false);
+              let perms = []
+              config.OWNER_ID.forEach((user) => {
+                perms.push({ id: user, type: "USER", permission: true })
+                console.log(
+                  `Adding permission for user ${user}...`
+                );
+              });
+              item.permissions.set({permissions: perms})
+              console.log(`Set permissions for ${item.name}.`)
+              break;
+            }
+          })
+      }, 3000)
+    })
     .catch(console.error);
-
-  console.log(`✅ > ${bot.user.username} is ready for action!`);
-  ready(bot, config.DEV_MODE);
 });
 
 bot.on("interactionCreate", async (interaction) => {
@@ -163,6 +178,7 @@ bot.on("interactionCreate", async (interaction) => {
 
 // Check if it's someone's birthday, and send a message at 7am server time
 import birthdayCheck from "./loops/birthdayCheck";
+import { setTimeout } from "timers";
 setInterval(async () => {
   let mongod = await MongoClient.connect(url);
   let db = mongod.db(dbName);
