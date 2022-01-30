@@ -3,7 +3,7 @@ import { CommandInteraction, MessageEmbed } from "discord.js";
 import { DateTime } from "luxon";
 import { Db, ObjectId } from "mongodb";
 
-const config = require("../../../data/config");
+import { config } from "../..";
 
 const fx = require("money");
 const oxr = require("open-exchange-rates");

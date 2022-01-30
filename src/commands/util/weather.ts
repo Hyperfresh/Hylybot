@@ -5,7 +5,7 @@ import { DateTime } from "luxon";
 import { Db, Document, WithId } from "mongodb";
 import fetch from "node-fetch";
 
-const config = require("../../../data/config.json");
+import { config } from "../.."
 
 let lastRun = DateTime.now();
 

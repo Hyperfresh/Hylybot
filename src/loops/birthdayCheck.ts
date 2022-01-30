@@ -3,7 +3,7 @@ import { Db } from "mongodb";
 
 import { DateTime } from "luxon";
 
-const config = require("../../data/config");
+import { config } from "..";
 
 export default async function birthdayCheck(db: Db, bot: Client) {
   let today = DateTime.now();

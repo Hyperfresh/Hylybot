@@ -1,6 +1,6 @@
 import { Client, User, GuildMember, Guild } from "discord.js";
 
-const config = require("../../data/config");
+import { config } from "..";
 
 /**
  * A helper library for building server profiles.

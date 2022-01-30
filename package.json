@@ -30,6 +30,7 @@
     "discord.js": "^13.6.0",
     "image-url-validator": "^1.0.4",
     "js-yaml": "^4.1.0",
+    "jsonc": "^2.0.0",
     "luxon": "^2.3.0",
     "minecraft-player": "^1.0.1",
     "moment-timezone": "^0.5.34",

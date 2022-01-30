@@ -4,7 +4,7 @@ import * as fs from "fs";
 
 import { load } from "js-yaml";
 
-const config = require("../../data/config");
+import { config } from "..";
 const userList = require(config.MC_LIST);
 const userData = config.MC_DATA;
 

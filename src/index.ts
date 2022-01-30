@@ -20,7 +20,7 @@ console.log(copy);
 
 if (!/^(v([1-9][6-9]+\.)?(\d+\.)?(\d+))$/.test(process.version)) {
   throw new Error(
-    `Hylybot and its key repository Discord.js requires Node v16.x or higher to run. You have ${process}.\nPlease upgrade your Node installation.`
+    `Hylybot and its key repository Discord.js requires Node v16.x or higher to run. You have v${process.version}.\nPlease upgrade your Node installation.`
   );
 }
 
@@ -36,9 +36,12 @@ const bot: Discord.Client = new Discord.Client({
 });
 const commands: Discord.Collection<any, any> = new Discord.Collection();
 
-let config = require("../data/config");
-
 import * as fs from "fs";
+
+import {jsonc} from "jsonc"
+let configData = fs.readFileSync("./data/config.jsonc", "utf8")
+let config = jsonc.parse(configData)
+export { config }
 
 import { MongoClient } from "mongodb";
 const url = config.MONGO_URL,
@@ -76,6 +79,18 @@ fs.readdir("./build/commands/", { withFileTypes: true }, (error, f) => {
 });
 
 bot.on("shardReady", async () => {
+  // Set permissions...
+
+  let guild = await bot.guilds.fetch(config.GUILD_ID)
+  guild.commands.cache.forEach(item => {
+    switch (item.name) {
+      case "bot":
+        item.setDefaultPermission(false)
+        item.permissions.set({permissions: [{id: "", type: "ROLE", permission: true}]})
+        break
+    }
+  })
+
   const rest = new REST({ version: "9" }).setToken(config.BOT_TOKEN);
   rest
     .put(Routes.applicationGuildCommands(config.CLIENT_ID, config.GUILD_ID), {
