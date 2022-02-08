@@ -218,11 +218,13 @@ const BadgeButton1 = new MessageActionRow().addComponents(
       .setStyle("SECONDARY")
       .setEmoji("940491507352354876")
       .setCustomId("furry"),
+  ),
+  BadgeButton4 = new MessageActionRow().addComponents(
     new MessageButton()
-      .setLabel("Clear my badges")
-      .setStyle("DANGER")
-      .setEmoji("💣")
-      .setCustomId("clearPride")
+    .setLabel("Clear my badges")
+    .setStyle("DANGER")
+    .setEmoji("💣")
+    .setCustomId("clearPride")
   );
 
 // Colour picker button
