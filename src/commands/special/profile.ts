@@ -621,6 +621,7 @@ module.exports.run = {
         case "catgender":
         case "ally":
         case "nd":
+        case "furry":
         case "clearPride":
           await buttonHelper.buttonBadge(interaction, db);
           break;
