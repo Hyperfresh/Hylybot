@@ -726,7 +726,7 @@ module.exports.run = {
             interaction.editReply({
               content:
                 "Click the appropriate buttons below to assign badges to your server profile. When you're done, dismiss this message.",
-              components: [BadgeButton1, BadgeButton2, BadgeButton3],
+              components: [BadgeButton1, BadgeButton2, BadgeButton3, BadgeButton4],
             });
             break;
           case "name":
