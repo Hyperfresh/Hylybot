@@ -214,6 +214,11 @@ const BadgeButton1 = new MessageActionRow().addComponents(
       .setEmoji("798918686676353034")
       .setCustomId("nd"),
     new MessageButton()
+      .setLabel("Furry")
+      .setStyle("SECONDARY")
+      .setEmoji("940491507352354876")
+      .setCustomId("furry"),
+    new MessageButton()
       .setLabel("Clear my badges")
       .setStyle("DANGER")
       .setEmoji("💣")

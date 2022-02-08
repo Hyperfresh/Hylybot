@@ -135,6 +135,7 @@ export async function createPrideBadges(r) {
     "<:nd:798918686676353034>",
     "<:catgender:916128763203420161>",
     "<:ally:916128799479955467>",
+    "<:furry:940491507352354876>"
   ];
   let prideBadgeEmoji = [
     "enby",
@@ -148,6 +149,7 @@ export async function createPrideBadges(r) {
     "nd",
     "catgender",
     "ally",
+    "furry"
   ]; // Badge types
   let prideBadgeEmoID = [
     "915950848121663559",
@@ -161,6 +163,7 @@ export async function createPrideBadges(r) {
     "798918686676353034",
     "916128763203420161",
     "916128799479955467",
+    "940491507352354876"
   ];
 
   let found = await construct(r, fullList);

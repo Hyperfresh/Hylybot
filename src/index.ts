@@ -41,7 +41,8 @@ import * as fs from "fs";
 import { jsonc } from "jsonc";
 let configData = fs.readFileSync("./data/config.jsonc", "utf8");
 let config = jsonc.parse(configData);
-export { config };
+
+export { config, bot };
 
 import { MongoClient } from "mongodb";
 const url = config.MONGO_URL,
@@ -99,17 +100,20 @@ bot.on("shardReady", async () => {
         (await commandos).forEach((item) => {
           console.log(`Setting permissions for command ${item.name}...`)
           switch (item.name) {
+            case "purge":
+              item.setDefaultPermission(false)
+              item.permissions.set({permissions: [{id: config.MODROLE_ID, type: "ROLE", permission: true}]})
+              break
             case "bot":
               item.setDefaultPermission(false);
               let perms = []
               config.OWNER_ID.forEach((user) => {
                 perms.push({ id: user, type: "USER", permission: true })
                 console.log(
-                  `Adding permission for user ${user}...`
+                  `Added permission for user ${user} to bot command.`
                 );
               });
               item.permissions.set({permissions: perms})
-              console.log(`Set permissions for ${item.name}.`)
               break;
             }
           })
@@ -140,6 +144,7 @@ bot.on("interactionCreate", async (interaction) => {
       "catgender",
       "ally",
       "nd",
+      "furry",
       "clearPride",
       "clearGenshin",
       "clearFC",
