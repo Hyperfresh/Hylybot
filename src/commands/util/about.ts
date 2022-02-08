@@ -46,10 +46,10 @@ async function aboutBot(client: Discord.Client) {
       "Engine information",
       `> **Discord.js v${Discord.version}**\nw/ Node ${process.version} & TypeScript v${typescript.version}\n\n**Heap used**: ${USED_HEAP}MB / ${TOTAL_HEAP}MB\n**Bot uptime**: ${CUT_string[0]}d ${CUT_string[1]}h ${CUT_string[2]}m ${CUT_string[3]}s`
     )
-    .setFooter(
-      "Created by @Hyperfresh#8080",
+    .setFooter({text:
+      "Created by @Hyperfresh#8080", iconURL:
       "https://media.discordapp.net/attachments/634575479042474003/663591393754742794/emote.gif"
-    );
+    });
 
   return aboutBotEmbed;
 }
@@ -59,7 +59,7 @@ async function aboutServer(guild: Discord.Guild) {
     .setTitle(guild.name)
     .setThumbnail(guild.iconURL({ size: 1024 }))
     .setDescription(
-      `> **Since ${guild.createdAt}**\nHome to **${guild.memberCount} members**, *Hyla + Friends* is where Hyla and mo friends hang out, play games and talk about whatever mo friends feel like talking about!\n\n<:ally:916128799479955467> <:nd:798918686676353034> *The server is an inclusive safe space for all its members, ensuring our most vulnerable feel protected and welcome.*`
+      `> **Alive and kicking since <t:${(guild.createdTimestamp/1000).toFixed(0)}:f>!**\nHome to **${guild.memberCount} members**, *Hyla + Friends* is where Hyla and mo friends hang out, play games and talk about whatever mo friends feel like talking about!\n\n<:ally:916128799479955467> <:nd:798918686676353034> *The server is an inclusive safe space for all its members, ensuring our most vulnerable feel protected and welcome.*`
     )
     .addField("Owners", "<@!352668050111201291>\n<@!758614967984848917>", true)
     .addField("Admins", "<@!135598560824524800>\n<@!267828479049859072>", true)
@@ -67,7 +67,8 @@ async function aboutServer(guild: Discord.Guild) {
       "Moderators",
       "<@!457350691296641025>\n<@!230209666435514368>",
       true
-    );
+    )
+    .setImage(guild.bannerURL())
 
   return aboutServerEmbed;
 }

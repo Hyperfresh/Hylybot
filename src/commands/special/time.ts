@@ -54,10 +54,8 @@ module.exports.run = {
           });
         return;
       }
-      let nameResult: string = result.name;
-      let nameArray: Array<string> = nameResult.split(" ");
       interaction.editReply(
-        `**${nameArray[0]}**'s time is ${DateTime.now()
+        `**${user.username}**'s time is ${DateTime.now()
           .setZone(result.timezone)
           .toLocaleString(DateTime.DATETIME_MED)}. (tz \`${result.timezone}\`)`
       );

@@ -5,7 +5,7 @@ import { DateTime } from "luxon";
 import { Db, Document, WithId } from "mongodb";
 import fetch from "node-fetch";
 
-import { config } from "../.."
+import { config } from "../..";
 
 let lastRun = DateTime.now();
 
@@ -37,6 +37,7 @@ async function returnWeatherEmbed(measure: string, location: string) {
   let temp = measure == "metric" ? "℃" : "℉";
 
   let embed = new MessageEmbed();
+  let alerts: Array<MessageEmbed> = [];
   let coords: Array<number> = [0, 0];
   await fetch(
     `https://api.openweathermap.org/data/2.5/weather?q=${location}&appid=${config.WEATHER_KEY}&units=${measure}`
@@ -105,9 +106,17 @@ async function returnWeatherEmbed(measure: string, location: string) {
       console.log("Retrieved onecall data.", data);
       if (data.alerts) {
         data.alerts.forEach((item) =>
-          embed.addField(
-            `⚠️ WEATHER ALERT: ${item.event}`,
-            `**Issued by ${item.sender_name} at <t:${item.start}:f> | Expires at <t:${item.end}:f>**\n${item.description}`
+          alerts.push(
+            new MessageEmbed()
+              .setAuthor({ name: "WEATHER ALERT" })
+              .setColor("YELLOW")
+              .setTitle(`${item.event} - Issued <t:${item.start}:f>`)
+              .setDescription(item.description)
+              .addField(
+                `Issued by ${item.sender_name}`,
+                `Expires at <t:${item.end}:f>`
+              )
+              .setFooter({ text: "via OpenWeatherMap" })
           )
         );
       }
@@ -133,7 +142,7 @@ async function returnWeatherEmbed(measure: string, location: string) {
         )
         .setDescription(String(err));
     });
-  return embed;
+  return { embed, alerts };
 }
 
 module.exports.run = {
@@ -254,8 +263,13 @@ module.exports.run = {
           let embed = await returnWeatherEmbed(measure, result.location);
           interaction.editReply({
             content: `Here's the weather for **${user.username}**.`,
-            embeds: [embed],
+            embeds: [embed.embed],
           });
+          if (embed.alerts)
+            await interaction.followUp({
+              content: `> ⚠️ **A weather warning is active for this location.**`,
+              embeds: embed.alerts,
+            });
           break;
         case "set":
           await interaction.deferReply({ ephemeral: true });
@@ -299,8 +313,13 @@ module.exports.run = {
       let embed = await returnWeatherEmbed(measure, location);
       await interaction.editReply({
         content: `Here's the weather for **${location}**.`,
-        embeds: [embed],
+        embeds: [embed.embed],
       });
+      if (embed.alerts)
+        await interaction.followUp({
+          content: `> ⚠️ **A weather warning is active for this location.**`,
+          embeds: embed.alerts,
+        });
     }
   },
 };
