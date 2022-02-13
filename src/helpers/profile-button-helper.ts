@@ -1,11 +1,8 @@
-import {
-  ButtonInteraction,
-  GuildMember,
-} from "discord.js";
+import { ButtonInteraction, GuildMember } from "discord.js";
 import { Db } from "mongodb";
 import * as badgeHelper from "./profile-badge-helper";
 
-import {createEmbed} from "../commands/special/profile"
+import { createEmbed } from "../commands/special/profile";
 
 async function dbSearch(
   db: Db,
@@ -67,41 +64,54 @@ export async function clearGametag(interaction: ButtonInteraction, db: Db) {
     );
     return;
   }
-  let noneExists = "You don't have this gametag. Chances are you've cleared it already."
+  let noneExists =
+    "You don't have this gametag. Chances are you've cleared it already.";
   switch (interaction.customId) {
     case "clearGenshin":
       if (result.gametags.genshin == null) {
-        await interaction.editReply(noneExists)
-        return
+        await interaction.editReply(noneExists);
+        return;
       }
-      db
-      .collection("profiles")
-      .updateOne({ user: interaction.user.id }, { $unset: {"gametags.genshin": ""}})
-      .then(async () => await interaction.editReply("Your Genshin Impact UID was cleared."))
-      .catch(async () => await interaction.editReply(noneExists))
-      break      
+      db.collection("profiles")
+        .updateOne(
+          { user: interaction.user.id },
+          { $unset: { "gametags.genshin": "" } }
+        )
+        .then(() =>
+          interaction.editReply("Your Genshin Impact UID was cleared.")
+        )
+        .catch(() => interaction.editReply(noneExists));
+      break;
     case "clearFortnite":
       if (result.gametags.fortnite == null) {
-        await interaction.editReply(noneExists)
-        return
+        await interaction.editReply(noneExists);
+        return;
       }
-      db
-      .collection("profiles")
-      .updateOne({ user: interaction.user.id }, { $unset: {"gametags.fortnite": ""}})
-      .then(async () => await interaction.editReply("Your Fortnite username was cleared."))
-      .catch(async () => await interaction.editReply(noneExists))
-      break
+      db.collection("profiles")
+        .updateOne(
+          { user: interaction.user.id },
+          { $unset: { "gametags.fortnite": "" } }
+        )
+        .then(() =>
+          interaction.editReply("Your Fortnite username was cleared.")
+        )
+        .catch(() => interaction.editReply(noneExists));
+      break;
     case "clearFC":
       if (result.gametags.switch == null) {
-        await interaction.editReply(noneExists)
-        return
+        await interaction.editReply(noneExists);
+        return;
       }
-      db
-      .collection("profiles")
-      .updateOne({ user: interaction.user.id }, { $unset: {"gametags.switch": ""}})
-      .then(async () => await interaction.editReply("Your Nintendo Switch FC was cleared."))
-      .catch(async () => await interaction.editReply(noneExists))
-      break
+      db.collection("profiles")
+        .updateOne(
+          { user: interaction.user.id },
+          { $unset: { "gametags.switch": "" } }
+        )
+        .then(() =>
+          interaction.editReply("Your Nintendo Switch FC was cleared.")
+        )
+        .catch(() => interaction.editReply(noneExists));
+      break;
   }
 }
 
@@ -152,10 +162,13 @@ export async function setupProfile(interaction: ButtonInteraction, db: Db) {
       genshin: null,
       mc: null,
       switch: null,
-      fortnite: null
+      fortnite: null,
     },
-    image: user.bannerURL({ dynamic: true }),
-    usertag: interaction.user.tag,
+    image: user.bannerURL({ dynamic: true, size: 1024 }),
+    avatar: user.avatarURL({
+      dynamic: true,
+      size: 1024,
+    }),
   });
 
   let embed = await createEmbed(

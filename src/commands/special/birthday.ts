@@ -1,6 +1,6 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
 import { CommandInteraction } from "discord.js";
-import { DateTime, Duration } from "luxon";
+import { DateTime } from "luxon";
 import { Db } from "mongodb";
 
 module.exports.run = {

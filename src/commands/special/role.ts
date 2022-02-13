@@ -89,19 +89,24 @@ module.exports.run = {
     ),
   async execute(interaction: any, db: Db) {
     if (interaction.isButton()) {
-      await interaction.deferUpdate()
+      await interaction.deferUpdate();
       if (interaction.customId == "preCol") {
         let response = [];
-        colours.forEach(item => {
-          response.push(` ${item.name}`)
-        })
-        await interaction.editReply(`**Pre-defined colours**:${response.toString()}`)
-      } else { // assume re-assign
+        colours.forEach((item) => {
+          response.push(` ${item.name}`);
+        });
+        await interaction.editReply(
+          `**Pre-defined colours**:${response.toString()}`
+        );
+      } else {
+        // assume re-assign
         let reassign = await db
-        .collection("roles")
-        .findOne({ user: interaction.user.id });
+          .collection("roles")
+          .findOne({ user: interaction.user.id });
         await interaction.member.roles.add(reassign.role);
-        await interaction.editReply({content: `Your role was reassigned: <@&${reassign.role}>`})
+        await interaction.editReply({
+          content: `Your role was reassigned: <@&${reassign.role}>`,
+        });
       }
       return;
     }
@@ -149,14 +154,17 @@ module.exports.run = {
         }
         interaction.guild.roles
           .create({
-              name: interaction.options.getString("role_name"),
-              color: rolecolour,
-              hoist: false,
-              position: 26
+            name: interaction.options.getString("role_name"),
+            color: rolecolour,
+            hoist: false,
+            position: 26,
           })
           .then((role) => {
-            const data = {user: String(interaction.user.id), role: String(role.id)}
-            db.collection("roles").insertOne(data)
+            const data = {
+              user: String(interaction.user.id),
+              role: String(role.id),
+            };
+            db.collection("roles").insertOne(data);
             interaction.member.roles.add(role.id);
             interaction.editReply(
               `Your custom role was created: <@&${role.id}>`

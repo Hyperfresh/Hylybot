@@ -49,20 +49,15 @@ export async function createEmbed(
     .toLocaleString(DateTime.DATETIME_MED);
   console.log(r);
   let embed = new MessageEmbed()
-    .setTitle(r.name)
+    .setTitle(`**${r.name}**`)
     .setColor(r.colour)
     .setDescription(
-      `**Pronouns**: ${r.pronouns}\n**Birthday**: ${r.bday} (age ${
+      `**Pronouns**: ${r.pronouns.join(", ")}\n**Birthday**: ${r.bday} (age ${
         r.age ? r.age : "unknown"
       })`
     )
-    .setThumbnail(
-      user.avatarURL({
-        dynamic: true,
-        size: 1024,
-      })
-    )
-    .setAuthor(r.usertag)
+    .setThumbnail(r.avatar)
+    .setAuthor({ name: String(user.tag) })
     .addField(
       "Game Interests & Hobbies",
       await badgeHelper.spaceout(
@@ -85,7 +80,7 @@ export async function createEmbed(
         : "No badges",
       true
     )
-    .setFooter(`Member ID: ${r.user}`);
+    .setFooter({ text: `Member ID: ${r.user}` });
   if (r.timezone != null)
     embed.addField(
       `The time for me is ${time}.`,
@@ -101,7 +96,12 @@ export async function createEmbed(
   } else {
     minecraft = await parseMinecraft(r.gametags.mc);
   }
-  if (minecraft != "Unknown" || r.gametags.switch || r.gametags.genshin) {
+  if (
+    minecraft != "Unknown" ||
+    r.gametags.switch ||
+    r.gametags.genshin ||
+    r.gametags.fortnite
+  ) {
     let NX = r.gametags.switch
       ? `**Nintendo Switch FC**: ${r.gametags.switch}\n`
       : "";
@@ -112,7 +112,8 @@ export async function createEmbed(
       ? `**Fortnite username**: ${r.gametags.fortnite}\n`
       : "";
     let MC = (result) => {
-      if (!result) return "*Run the `view` command again to see Minecraft username*";
+      if (!result)
+        return "*Run the `view` command again to see Minecraft username*";
       else if (result == "Unknown") return "";
       else return `**Minecraft username**: ${result}`;
     };
@@ -213,10 +214,17 @@ const BadgeButton1 = new MessageActionRow().addComponents(
       .setEmoji("798918686676353034")
       .setCustomId("nd"),
     new MessageButton()
-      .setLabel("Clear my badges")
-      .setStyle("DANGER")
-      .setEmoji("💣")
-      .setCustomId("clearPride")
+      .setLabel("Furry")
+      .setStyle("SECONDARY")
+      .setEmoji("940491507352354876")
+      .setCustomId("furry"),
+  ),
+  BadgeButton4 = new MessageActionRow().addComponents(
+    new MessageButton()
+    .setLabel("Clear my badges")
+    .setStyle("DANGER")
+    .setEmoji("💣")
+    .setCustomId("clearPride")
   );
 
 // Colour picker button
@@ -379,6 +387,19 @@ module.exports.run = {
       group
         .setName("edit")
         .setDescription("Edit your server profile.")
+        .addSubcommand((subcommand) =>
+          subcommand
+            .setName("avatar")
+            .setDescription("Set the avatar on your profile.")
+            .addStringOption((option) =>
+              option
+                .setName("url")
+                .setDescription(
+                  "Would you like to set a different avatar? Otherwise, I'll use your Discord avatar."
+                )
+                .setRequired(false)
+            )
+        )
         .addSubcommand((subcommand) =>
           subcommand
             .setName("pronouns")
@@ -600,6 +621,7 @@ module.exports.run = {
         case "catgender":
         case "ally":
         case "nd":
+        case "furry":
         case "clearPride":
           await buttonHelper.buttonBadge(interaction, db);
           break;
@@ -671,6 +693,24 @@ module.exports.run = {
         }
         let value;
         switch (interaction.options.getSubcommand()) {
+          case "avatar":
+            value = interaction.options.getString("url");
+            if (!value)
+              value = interaction.user.avatarURL({ dynamic: true, size: 1024 });
+            if (!isImageURL(value)) {
+              interaction.editReply("Your image URL is invalid.");
+              return;
+            }
+            await db
+              .collection("profiles")
+              .updateOne(
+                { user: interaction.user.id },
+                { $set: { avatar: value } }
+              );
+            interaction.editReply(
+              `Your __avatar__ was updated to ** ${value} **`
+            );
+            break;
           case "pronouns":
             value = interaction.options.getString("pronoun");
             await db
@@ -687,7 +727,7 @@ module.exports.run = {
             interaction.editReply({
               content:
                 "Click the appropriate buttons below to assign badges to your server profile. When you're done, dismiss this message.",
-              components: [BadgeButton1, BadgeButton2, BadgeButton3],
+              components: [BadgeButton1, BadgeButton2, BadgeButton3, BadgeButton4],
             });
             break;
           case "name":
@@ -853,7 +893,9 @@ module.exports.run = {
               { user: interaction.user.id },
               { $set: { image: value } }
             );
-            interaction.editReply(`Your __image__ was updated to **${value}**`);
+            interaction.editReply(
+              `Your __image__ was updated to ** ${value} **`
+            );
             break;
         }
         break;

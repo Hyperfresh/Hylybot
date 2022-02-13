@@ -46,8 +46,6 @@ module.exports.run = {
       notThere(interaction, user);
       return;
     }
-    let nameResult: string = result.name;
-    let nameArray: Array<string> = nameResult.split(" ");
     switch (interaction.options.getString("tag")) {
       case "genshin":
         if (!result.gametags.genshin) {
@@ -55,7 +53,7 @@ module.exports.run = {
           return;
         }
         interaction.editReply(
-          `**${nameArray[0]}**'s Genshin Impact UID is \`${result.gametags.genshin}\``
+          `**${user.username}**'s Genshin Impact UID is \`${result.gametags.genshin}\``
         );
         break;
       case "fortnite":
@@ -64,7 +62,7 @@ module.exports.run = {
           return;
         }
         interaction.editReply(
-          `**${nameArray[0]}**'s Fortnite username is \`${result.gametags.fortnite}\``
+          `**${user.username}**'s Fortnite username is \`${result.gametags.fortnite}\``
         );
         break;
       case "switch":
@@ -73,7 +71,7 @@ module.exports.run = {
           return;
         }
         interaction.editReply(
-          `**${nameArray[0]}**'s Switch FC is \`${result.gametags.switch}\``
+          `**${user.username}**'s Switch FC is \`${result.gametags.switch}\``
         );
         break;
       case "mc":
@@ -94,7 +92,7 @@ module.exports.run = {
           );
         else
           interaction.editReply(
-            `**${nameArray[0]}**'s Minecraft username is ${minecraft}`
+            `**${user.username}**'s Minecraft username is ${minecraft}`
           );
         break;
     }
