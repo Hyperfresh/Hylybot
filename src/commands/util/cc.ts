@@ -1,12 +1,14 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
-import { MessageEmbed } from "discord.js";
+import { CommandInteraction, MessageEmbed } from "discord.js";
 import { DateTime } from "luxon";
+import { Db, ObjectId } from "mongodb";
 
-const config = require("../../../data/config");
+import { config } from "../..";
 
 const fx = require("money");
 const oxr = require("open-exchange-rates");
 oxr.set({ app_id: config.CC_API_KEY });
+const object = new ObjectId(config.CC_OBJECT);
 
 module.exports.run = {
   data: new SlashCommandBuilder()
@@ -34,24 +36,23 @@ module.exports.run = {
         )
         .setRequired(false)
     ),
-  async execute(interaction, db) {
+  async execute(interaction: CommandInteraction, db: Db) {
     await interaction.deferReply();
 
-    let search = await db
-      .collection("currencies")
-      .findOne({_id: "61a84588813893d4c48889c0"})
-    if (Number(search.timestamp) + 10800 >= DateTime.now().toMillis()) {
-      oxr.latest(() => {
+    let search = await db.collection("currencies").findOne({ _id: object });
+    if (
+      Number(search.timestamp) + 86400000 <= DateTime.now().toMillis() ||
+      search.timestamp == "undefined"
+    ) {
+      await oxr.latest(async () => {
         const update = {
           rates: oxr.rates,
           base: oxr.base,
           timestamp: String(oxr.timestamp),
         };
-        db.collection("currencies").replaceOne(
-          { _id: "61a84588813893d4c48889c0" },
-          update
-        );
+        await db.collection("currencies").replaceOne({ _id: object }, update);
         console.log("Currency rates updated");
+        search = await db.collection("currencies").findOne({ _id: object });
       });
     }
 
@@ -65,7 +66,7 @@ module.exports.run = {
       if (!convertTo) {
         convertTo = "aud";
       }
-      console.log(search)
+      console.log(search);
       fx.rates = search.rates;
       fx.base = search.base;
       result = fx.convert(value, {
@@ -73,18 +74,17 @@ module.exports.run = {
         to: convertTo.toUpperCase(),
       });
       let embed = new MessageEmbed()
-        .setAuthor(`${value} ${convertFrom} is`)
+        .setAuthor({ name: `${value} ${convertFrom} is` })
         .setTitle(`-> ${result.toFixed(2)} ${convertTo.toUpperCase()}`)
         .setDescription(
-          "Rates are from [Open Exchange Rates](https://openexchangerates.org)."
+          "Rates are from [Open Exchange Rates](https://openexchangerates.org), updated every 24 hours."
         )
-        .setFooter("Rates last updated")
+        .setFooter({ text: "Rates last updated" })
         .setTimestamp(Number(search.timestamp));
       interaction.editReply({ embeds: [embed] });
     } catch (err) {
       interaction.editReply({
         content: `An error occurred: \`\`\`${err}\`\`\``,
-        ephemeral: true,
       });
     }
   },
@@ -93,5 +93,5 @@ module.exports.run = {
 module.exports.help = {
   name: "cc",
   usage: "/cc <currency> <value> [convert]",
-  desc: "Convert currencies around the world",
+  desc: "Convert currencies around the world. By default, it converts to AUD.",
 };

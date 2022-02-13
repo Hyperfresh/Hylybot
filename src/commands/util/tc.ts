@@ -1,5 +1,6 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
-import { MessageEmbed } from "discord.js";
+import { CommandInteraction } from "discord.js";
+import { Db } from "mongodb";
 
 module.exports.run = {
   data: new SlashCommandBuilder()
@@ -19,7 +20,7 @@ module.exports.run = {
         .setDescription("The value you want to convert")
         .setRequired(true)
     ),
-  async execute(interaction, db) {
+  async execute(interaction: CommandInteraction, db: Db) {
     let temp = interaction.options.getNumber("value");
     if (interaction.options.getString("temp") == "C") {
       await interaction.reply(`${(temp * 1.8 + 32).toFixed(2)}℉`);

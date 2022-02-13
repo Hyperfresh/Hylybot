@@ -3,6 +3,7 @@
 
 import { SlashCommandBuilder } from "@discordjs/builders";
 import { MessageActionRow, MessageButton } from "discord.js";
+import { Db } from "mongodb";
 
 const colourButton = new MessageActionRow().addComponents(
   new MessageButton()
@@ -86,21 +87,26 @@ module.exports.run = {
     .addSubcommand((subCommand) =>
       subCommand.setName("remove").setDescription("Removes your custom role.")
     ),
-  async execute(interaction, db) {
+  async execute(interaction: any, db: Db) {
     if (interaction.isButton()) {
-      await interaction.deferUpdate()
+      await interaction.deferUpdate();
       if (interaction.customId == "preCol") {
         let response = [];
-        colours.forEach(item => {
-          response.push(` ${item.name}`)
-        })
-        await interaction.editReply(`**Pre-defined colours**:${response.toString()}`)
-      } else { // assume re-assign
+        colours.forEach((item) => {
+          response.push(` ${item.name}`);
+        });
+        await interaction.editReply(
+          `**Pre-defined colours**:${response.toString()}`
+        );
+      } else {
+        // assume re-assign
         let reassign = await db
-        .collection("roles")
-        .findOne({ _id: interaction.user.id });
+          .collection("roles")
+          .findOne({ user: interaction.user.id });
         await interaction.member.roles.add(reassign.role);
-        await interaction.editReply({content: `Your role was reassigned: <@&${reassign.role}>`})
+        await interaction.editReply({
+          content: `Your role was reassigned: <@&${reassign.role}>`,
+        });
       }
       return;
     }
@@ -109,7 +115,7 @@ module.exports.run = {
     let __FOUND;
     let search = await db
       .collection("roles")
-      .findOne({ _id: interaction.user.id });
+      .findOne({ user: interaction.user.id });
     switch (interaction.options.getSubcommand()) {
       case "create": // Create a role
         if (search) {
@@ -148,16 +154,17 @@ module.exports.run = {
         }
         interaction.guild.roles
           .create({
-            data: {
-              name: interaction.options.getString(),
-              color: rolecolour,
-              hoist: false,
-              position: 26
-            },
+            name: interaction.options.getString("role_name"),
+            color: rolecolour,
+            hoist: false,
+            position: 26,
           })
           .then((role) => {
-            const data = {_id: String(interaction.user.id), role: String(role.id)}
-            db.collection("roles").insertOne(data)
+            const data = {
+              user: String(interaction.user.id),
+              role: String(role.id),
+            };
+            db.collection("roles").insertOne(data);
             interaction.member.roles.add(role.id);
             interaction.editReply(
               `Your custom role was created: <@&${role.id}>`
@@ -222,7 +229,7 @@ module.exports.run = {
         break;
       case "remove": // Delete a role
         await interaction.member.roles.remove(search.role);
-        await db.collection("roles").deleteOne({ _id: interaction.user.id });
+        await db.collection("roles").deleteOne({ user: interaction.user.id });
         interaction.editReply(
           `Your custom role was removed and deleted. Create a new one at any time.`
         );

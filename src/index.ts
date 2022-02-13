@@ -20,7 +20,7 @@ console.log(copy);
 
 if (!/^(v([1-9][6-9]+\.)?(\d+\.)?(\d+))$/.test(process.version)) {
   throw new Error(
-    `Hylybot and its key repository Discord.js requires Node v16.x or higher to run. You have ${process}.\nPlease upgrade your Node installation.`
+    `Hylybot and its key repository Discord.js requires Node v16.x or higher to run. You have v${process.version}.\nPlease upgrade your Node installation.`
   );
 }
 
@@ -36,9 +36,13 @@ const bot: Discord.Client = new Discord.Client({
 });
 const commands: Discord.Collection<any, any> = new Discord.Collection();
 
-let config = require("../data/config");
-
 import * as fs from "fs";
+
+import { jsonc } from "jsonc";
+let configData = fs.readFileSync("./data/config.jsonc", "utf8");
+let config = jsonc.parse(configData);
+
+export { config, bot };
 
 import { MongoClient } from "mongodb";
 const url = config.MONGO_URL,
@@ -76,30 +80,88 @@ fs.readdir("./build/commands/", { withFileTypes: true }, (error, f) => {
 });
 
 bot.on("shardReady", async () => {
+  console.log(`✅ > ${bot.user.username} is ready for action!`);
+  await ready(bot, config.DEV_MODE);
+
+  // Push commands...
   const rest = new REST({ version: "9" }).setToken(config.BOT_TOKEN);
-  rest
+  await rest
     .put(Routes.applicationGuildCommands(config.CLIENT_ID, config.GUILD_ID), {
       body: commandsToPush,
     })
-    .then(() => console.log("Pushed commands."))
+    .then(() => {
+      console.log("Pushed commands.")
+    })
+    .then(() => {
+      console.log("Attempting to set permissions...")
+      setTimeout(async () => {
+        let guild = bot.guilds.cache.find((val) => val.id == config.GUILD_ID);
+        let commandos = guild.commands.fetch();
+        (await commandos).forEach((item) => {
+          console.log(`Setting permissions for command ${item.name}...`)
+          switch (item.name) {
+            case "purge":
+              item.setDefaultPermission(false)
+              item.permissions.set({permissions: [{id: config.MODROLE_ID, type: "ROLE", permission: true}]})
+              break
+            case "bot":
+              item.setDefaultPermission(false);
+              let perms = []
+              config.OWNER_ID.forEach((user) => {
+                perms.push({ id: user, type: "USER", permission: true })
+                console.log(
+                  `Added permission for user ${user} to bot command.`
+                );
+              });
+              item.permissions.set({permissions: perms})
+              break;
+            }
+          })
+      }, 3000)
+    })
     .catch(console.error);
-
-  console.log(`✅ > ${bot.user.username} is ready for action!`);
-  ready(bot, config.DEV_MODE);
 });
 
 bot.on("interactionCreate", async (interaction) => {
   let mongod = await MongoClient.connect(url);
   let db = mongod.db(dbName);
 
-  if (config.DEV_MODE && !config.OWNER_ID.includes(interaction.user.id)) return
+  if (config.DEV_MODE && !config.OWNER_ID.includes(interaction.user.id)) return;
 
   if (interaction.isButton()) {
+    let profileButtonID = [
+      "viewPride",
+      "gay",
+      "lesbian",
+      "bi",
+      "pan",
+      "ace",
+      "aro",
+      "trans",
+      "enby",
+      "agender",
+      "gq",
+      "catgender",
+      "ally",
+      "nd",
+      "furry",
+      "clearPride",
+      "clearGenshin",
+      "clearFC",
+      "clearMC",
+      "clearFortnite",
+      "clearTag",
+      "create",
+    ];
     if (
       interaction.customId == "preCol" ||
       interaction.customId == "reassign"
     ) {
       let command = commands.get("role");
+      command.run.execute(interaction, db);
+    }
+    if (profileButtonID.includes(interaction.customId)) {
+      let command = commands.get("profile");
       command.run.execute(interaction, db);
     }
   }
@@ -118,6 +180,15 @@ bot.on("interactionCreate", async (interaction) => {
     }
   }
 });
+
+// Check if it's someone's birthday, and send a message at 7am server time
+import birthdayCheck from "./loops/birthdayCheck";
+import { setTimeout } from "timers";
+setInterval(async () => {
+  let mongod = await MongoClient.connect(url);
+  let db = mongod.db(dbName);
+  await birthdayCheck(db, bot);
+}, 3600000);
 
 // import OzAlertFetch from "./loops/ozalert"
 // setInterval(async () => await OzAlertFetch(bot), 60000)

@@ -17,10 +17,10 @@ import { Client } from "discord.js";
 
 export default async function ready(bot: Client, dev: boolean) {
   if (dev) {
-    bot.user.setActivity("to Hy's commands", {type: "LISTENING"})
-    bot.user.setStatus("dnd")
-    console.warn("Developer Mode is active!")
-    return
+    bot.user.setActivity("⚠️ DEVELOPER MODE", { type: "PLAYING" });
+    bot.user.setStatus("dnd");
+    console.warn("Developer Mode is active!");
+    return;
   }
   bot.user.setActivity("for /", { type: "WATCHING" });
   bot.user.setStatus("online");
