@@ -6,10 +6,10 @@ import { DateTime } from "luxon";
 import { config } from "..";
 
 export default async function birthdayCheck(db: Db, bot: Client) {
-  let today = DateTime.now();
+  let today = DateTime.now().setZone("utc");
   let hh = today.hour;
 
-  if (hh == 7) {
+  if (hh == 12) {
     console.log("Checking birthdays...");
     let guild = bot.guilds.cache.find((val) => val.id == config.GUILD_ID);
     let oldMembers = guild.roles.fetch(config.BIRTH_ID);
