@@ -261,11 +261,11 @@ module.exports.run = {
           let measure = interaction.options.getString("measurement");
           if (!measure) measure = "metric";
           let embed = await returnWeatherEmbed(measure, result.location);
-          interaction.editReply({
+          await interaction.editReply({
             content: `Here's the weather for **${user.username}**.`,
             embeds: [embed.embed],
           });
-          if (embed.alerts)
+          if (embed.alerts.length)
             await interaction.followUp({
               content: `> ⚠️ **A weather warning is active for this location.**`,
               embeds: embed.alerts,
