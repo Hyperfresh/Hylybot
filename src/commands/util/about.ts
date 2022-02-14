@@ -22,7 +22,7 @@ async function aboutBot(client: Discord.Client) {
   let USED_MEM = ((totalmem() - freemem()) / 1e9).toFixed(2);
   let TOTAL_MEM = (totalmem() / 1e9).toFixed(2);
 
-  let CUT = Duration.fromMillis(client.uptime * 1000).toFormat("d h m s");
+  let CUT = Duration.fromMillis(client.uptime).toFormat("d h m s");
   let CUT_string = CUT.split(" ");
   let USED_HEAP = (memoryUsage().heapUsed / 1e6).toFixed(2);
   let TOTAL_HEAP = (memoryUsage().heapTotal / 1e6).toFixed(2);
