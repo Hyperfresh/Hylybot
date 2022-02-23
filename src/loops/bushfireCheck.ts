@@ -7,15 +7,6 @@ import { parseStringPromise } from "xml2js";
 import { config } from "..";
 const ratingObject = new ObjectId(config.RAT_OBJ)
 
-const mbxClient = require('@mapbox/mapbox-sdk');
-const mbxStyles = require('@mapbox/mapbox-sdk/services/styles');
-const mbxTilesets = require('@mapbox/mapbox-sdk/services/tilesets');
-
-const baseClient = mbxClient({ accessToken: config.ALERT_ID });
-const stylesService = mbxStyles(baseClient);
-const tilesetsService = mbxTilesets(baseClient);
-
-
 export default async function ratingCheck(bot: Client, db: Db) {
     let guild = bot.guilds.cache.find((val) => val.id == config.GUILD_ID);
     let channel: any = guild.channels.cache.find(
