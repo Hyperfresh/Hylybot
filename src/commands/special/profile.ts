@@ -390,7 +390,7 @@ module.exports.run = {
         .addSubcommand((subcommand) =>
           subcommand
             .setName("avatar")
-            .setDescription("Set the avatar on your profile.")
+            .setDescription("👤 Set the avatar on your profile.")
             .addStringOption((option) =>
               option
                 .setName("url")
@@ -404,7 +404,7 @@ module.exports.run = {
           subcommand
             .setName("pronouns")
             .setDescription(
-              "Add a set of neopronouns to your profile. For conventional pronouns, check #role-assign."
+              "💬 Add a set of neopronouns to your profile. For conventional pronouns, check #role-assign."
             )
             .addStringOption((option) =>
               option
@@ -416,19 +416,19 @@ module.exports.run = {
         .addSubcommand(
           // Pride badges
           (subCommand) =>
-            subCommand.setName("badges").setDescription("Set pride badges.")
+            subCommand.setName("badges").setDescription("🏳️‍🌈🏳️‍⚧️ Set pride badges.")
         )
         .addSubcommand(
           // Name
           (subCommand) =>
             subCommand
               .setName("name")
-              .setDescription("Set your name.")
+              .setDescription("👋 Set your name.")
               .addStringOption((option) =>
                 option
                   .setName("value")
                   .setDescription(
-                    "Your (full) IRL name is preferred, but online names are fine as well."
+                    "Your first name and last initial is fine, as well as online names. Please use English-spelt names."
                   )
                   .setRequired(true)
               )
@@ -439,7 +439,7 @@ module.exports.run = {
             subCommand
               .setName("birthday")
               .setDescription(
-                "Set your birthday (and optionally set your age)."
+                "📅 Set your birthday (and optionally set your age)."
               )
               .addIntegerOption(
                 (
@@ -487,7 +487,7 @@ module.exports.run = {
             subCommand
               .setName("gametag")
               .setDescription(
-                "Add a tag from a game or console, such as a Nintendo Switch friend code."
+                "🎮 Add a tag from a game or console, such as a Nintendo Switch friend code."
               )
               .addStringOption((option) =>
                 option
@@ -511,7 +511,7 @@ module.exports.run = {
           (subCommand) =>
             subCommand
               .setName("bio")
-              .setDescription("Set the bio of your server profile.")
+              .setDescription("🗒 Set the bio of your server profile.")
               .addStringOption((option) =>
                 option
                   .setName("title")
@@ -532,7 +532,7 @@ module.exports.run = {
           (subCommand) =>
             subCommand
               .setName("colour")
-              .setDescription("Set the colour of your server profile.")
+              .setDescription("🌈 Set the colour of your server profile.")
               .addStringOption((option) =>
                 option
                   .setName("value")
@@ -545,7 +545,7 @@ module.exports.run = {
           (subCommand) =>
             subCommand
               .setName("timezone")
-              .setDescription("Set your time zone.")
+              .setDescription("⏰ Set your time zone.")
               .addStringOption((option) =>
                 option
                   .setName("tz")
@@ -558,7 +558,7 @@ module.exports.run = {
           (subCommand) =>
             subCommand
               .setName("image")
-              .setDescription("Set an image to display in your server profile.")
+              .setDescription("🖼 Set an image to display in your server profile.")
               .addStringOption((option) =>
                 option
                   .setName("url")
@@ -570,7 +570,7 @@ module.exports.run = {
     .addSubcommand((subCommand) =>
       subCommand
         .setName("view")
-        .setDescription("View a server profile - yours, by default.")
+        .setDescription("🔍 View a server profile - yours, by default.")
         .addUserOption((option) =>
           option
             .setName("user")
@@ -583,13 +583,13 @@ module.exports.run = {
     .addSubcommand((subCommand) =>
       subCommand
         .setName("clear")
-        .setDescription("Clear a field from your server profile.")
+        .setDescription("💣 Clear a field from your server profile.")
         .addStringOption((option) =>
           option
             .setName("field")
             .setDescription("Choose the field to clear.")
             .setRequired(true)
-            .addChoice("💣 CLEAR EVERYTHING", "delete")
+            .addChoice("💥 CLEAR EVERYTHING", "delete")
             .addChoice("Name", "name")
             .addChoice("Birthday & age", "bday")
             .addChoice("Age only", "age")
