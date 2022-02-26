@@ -44,14 +44,54 @@ let config = jsonc.parse(configData);
 
 export { config, bot };
 
-import { MongoClient } from "mongodb";
+import { MongoClient, Db, ObjectId } from "mongodb";
 const url = config.MONGO_URL,
   dbName = config.MONGO_DBNAME;
+
+
 
 import ready from "./events/ready";
 
 import { REST } from "@discordjs/rest";
 import { Routes } from "discord-api-types/v9";
+
+import { Starboard, StarboardDefaultCreateOptions } from "discord-starboards"
+const StarboardManager: any = require("discord-starboards")
+const StarboardsManagerCustomDb: any = class extends StarboardManager {
+  async getDb(): Promise<Db> {
+    let mongod = await MongoClient.connect(url);
+    return mongod.db(dbName);
+  }
+  public async getAllStarboards(): Promise<any> {
+    console.log("Grabbing starboard database...")
+    const db = await this.getDb()
+    const res = await db.collection("starboard").find().toArray()
+    console.log(res)
+    return res
+  }
+  public async saveStarboard(data: Starboard): Promise<boolean | void> {
+    (await this.getDb()).collection("starboard").insertOne(data)
+    return true
+  }
+  public async deleteStarboard(channelId: string, emoji: string): Promise<boolean | void> {
+    const db = (await this.getDb()).collection("starboard")
+    db.findOneAndDelete((starboard: Starboard) => (starboard.channelId === channelId && starboard.options.emoji === emoji))
+    return true
+  }
+  public async editStarboard(channelId: string, emoji: string, data: Partial<StarboardDefaultCreateOptions>): Promise<boolean | void> {
+    const db = (await this.getDb()).collection("starboard")
+    db.findOneAndUpdate((starboard: Starboard) => (starboard.channelId === channelId && starboard.options.emoji === emoji), data)
+  }
+}
+const manager = new StarboardsManagerCustomDb(bot, {storage: false, ignoredChannels: []})
+export { manager }
+
+export async function getDbConfig(str: string): Promise<any> {
+  let mongod = await MongoClient.connect(url)
+  let db = mongod.db(dbName)
+  let res = await db.collection("hybot").findOne({item: str})
+  return res.value
+}
 
 let commandsToPush = [];
 
@@ -180,6 +220,18 @@ bot.on("interactionCreate", async (interaction) => {
     }
   }
 });
+
+manager.on("starboardNoEmptyMsg", (emoji, message, user) => {
+  message.channel.send(`<@${user.id}>, this message seems to have no content. What's the point in starring that?`)
+})
+
+// manager.on("starboardReactionAdd", async (emoji, message, user) => {
+//   let locked: boolean = await getDbConfig("starboardLock")
+
+//   if (emoji == "star" && locked) {
+//     message.channel.send(`<@!${user.id}>, the starboard is locked. New stars cannot be added to this message.`)
+//   }
+// })
 
 // Check if it's someone's birthday, and send a message at 7am server time
 import birthdayCheck from "./loops/birthdayCheck";

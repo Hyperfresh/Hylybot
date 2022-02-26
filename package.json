@@ -27,6 +27,7 @@
     "@types/ws": "^8.5.0",
     "@types/xml2js": "^0.4.9",
     "discord-api-types": "^0.27.3",
+    "discord-starboards": "^2.3.2",
     "discord.js": "^13.6.0",
     "image-url-validator": "^1.0.4",
     "js-yaml": "^4.1.0",
