@@ -233,7 +233,7 @@ manager.on("starboardNoEmptyMsg", (emoji, message, user) => {
 //   }
 // })
 
-// Check if it's someone's birthday, and send a message at 7am server time
+// Check if it's someone's birthday, and send a message at midday UTC time
 import birthdayCheck from "./loops/birthdayCheck";
 import { setTimeout } from "timers";
 setInterval(async () => {
