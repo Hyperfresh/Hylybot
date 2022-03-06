@@ -9,7 +9,7 @@ async function looseJsonParse(obj) {
   try {
     test = await Function('"use strict";return (' + obj + ")")();
   } catch (err) {
-    test = err;
+    test = err.stack;
   }
   return test;
 }

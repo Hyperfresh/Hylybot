@@ -44,7 +44,7 @@ let config = jsonc.parse(configData);
 
 export { config, bot };
 
-import { MongoClient, Db, ObjectId } from "mongodb";
+import { MongoClient, Db } from "mongodb";
 const url = config.MONGO_URL,
   dbName = config.MONGO_DBNAME;
 
@@ -65,9 +65,7 @@ const StarboardsManagerCustomDb: any = class extends StarboardManager {
   public async getAllStarboards(): Promise<any> {
     console.log("Grabbing starboard database...")
     const db = await this.getDb()
-    const res = await db.collection("starboard").find().toArray()
-    console.log(res)
-    return res
+    return db.collection("starboard").find().toArray()
   }
   public async saveStarboard(data: Starboard): Promise<boolean | void> {
     (await this.getDb()).collection("starboard").insertOne(data)

@@ -1,6 +1,7 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
 import {
   CommandInteraction,
+  EmbedFieldData,
   MessageActionRow,
   MessageButton,
   MessageEmbed,
@@ -10,7 +11,6 @@ import { DateTime } from "luxon";
 import { Db } from "mongodb";
 
 import * as timezone from "moment-timezone";
-import { isArray } from "util";
 
 const timezoneButton = new MessageActionRow().addComponents(
   new MessageButton()
@@ -19,12 +19,70 @@ const timezoneButton = new MessageActionRow().addComponents(
     .setStyle("LINK")
 );
 
-const timeFormatButton = new MessageActionRow().addComponents(
-  new MessageButton()
-    .setLabel("Learn more about ISO 8601 format")
-    .setURL("https://en.wikipedia.org/wiki/ISO_8601")
-    .setStyle("LINK")
-);
+export class TimeConvert {
+  static async parseTime(time: string, tz?: string): Promise<DateTime> {
+    let conv: DateTime = null;
+    let formats = ["t", "h:mma", "T", "Hmm"];
+    console.log(`Attempting to parse time format ${time}...`);
+    formats.forEach((item) => {
+      try {
+        conv = DateTime.fromFormat(`${time}`, item, {zone: tz});
+      } catch (err) {
+        console.log(`Probably not format ${item}, got error ${err}`);
+      }
+    });
+    if (!conv) throw Error("Unable to parse given time");
+    return conv;
+  }
+
+  static async compareWorld(db: Db, time?: string, timezone?: string): Promise<MessageEmbed> {
+    let conv: DateTime = null;
+    let em = new MessageEmbed();
+    if (time) {
+      conv = await TimeConvert.parseTime(time, timezone).catch((err) => {
+        throw Error(err);
+      });
+    } else {
+      conv = DateTime.now();
+    }
+    let result = await db
+      .collection("profiles")
+      .find({ timezone: { $not: { $eq: null } } })
+      .toArray();
+
+    let tz: Array<string> = [];
+    result.forEach((item) => {
+      if (!tz.includes(item.timezone)) tz.push(item.timezone);
+    });
+    let ar: Array<EmbedFieldData> = [];
+    tz.forEach((item) => {
+      ar.push({name: item, value: conv.setZone(item).toFormat("d MMMM y T"), inline: true});
+    });
+    em.setTitle(`**<t:${conv.toSeconds().toFixed(0)}:f>** for you is...`)
+      .addFields(ar)
+      .setFooter({
+        text: "Is your timezone not on this list? Make sure you've registered your timezone with /profile register timezone.",
+      });
+    return em;
+  }
+
+  static async compareUser(
+    user: User,
+    db: Db,
+    time: string
+  ): Promise<MessageEmbed> {
+    let conv: DateTime;
+    let em = new MessageEmbed();
+    let result = await db.collection("profiles").findOne({ user: user.id });
+    if (!result || result.timezone == null)
+      throw Error("Target user has no time zone set");
+    conv = (await TimeConvert.parseTime(time, result.timezone));
+    em.setAuthor({ name: conv.toFormat("d MMMM y T (ZZZZZ)") }).setTitle(
+      `> ➡ **<t:${conv.toSeconds().toFixed(0)}:f>**`
+    );
+    return em;
+  }
+}
 
 module.exports.run = {
   data: new SlashCommandBuilder()
@@ -32,17 +90,37 @@ module.exports.run = {
     .setDescription("Find the time of a user or a timezone.")
     .addSubcommand((sub) =>
       sub
-        .setName("compare")
-        .setDescription("Compare your time with another user.")
-        .addUserOption((opt) =>
-          opt.setName("user").setDescription("Optional user to compare to.")
-        )
-        .addStringOption((opt) =>
+        .setName("world")
+        .setDescription("Compare times around the world.")
+        .addIntegerOption((opt) =>
           opt
             .setName("time")
             .setDescription(
-              'The time to compare in format "d/m/yyyy, h:mm am/pm". If none given, I\'ll use your current time.'
+              "(Optional) YOUR time that you want to compare, in 24 hour time. Exclude the semicolon."
             )
+            .setMinValue(0)
+            .setMaxValue(2359)
+        )
+    )
+    .addSubcommand((sub) =>
+      sub
+        .setName("compare")
+        .setDescription("Compare someone else's time with your time.")
+        .addUserOption((opt) =>
+          opt
+            .setName("who")
+            .setDescription("Which user's time did you want to compare?")
+            .setRequired(true)
+        )
+        .addIntegerOption((opt) =>
+          opt
+            .setName("time")
+            .setDescription(
+              "THE USER's time that you want to compare, in 24 hour time. Exclude the semicolon."
+            )
+            .setMinValue(0)
+            .setMaxValue(2359)
+            .setRequired(true)
         )
     )
     .addSubcommand((subCommand) =>
@@ -50,7 +128,7 @@ module.exports.run = {
         .setName("user")
         .setDescription("Find the time of a user.")
         .addUserOption((option) =>
-          option.setName("who").setDescription("Which user?")
+          option.setName("who").setDescription("Which user?").setRequired(true)
         )
     )
     .addSubcommand((subCommand) =>
@@ -67,6 +145,8 @@ module.exports.run = {
   async execute(interaction: CommandInteraction, db: Db) {
     let user: User;
     let result: any;
+    let time: any;
+    let em: MessageEmbed;
     switch (interaction.options.getSubcommand()) {
       case "user":
         await interaction.deferReply();
@@ -83,14 +163,13 @@ module.exports.run = {
             });
           return;
         }
-        interaction.editReply(
+        return interaction.editReply(
           `**${user.username}**'s time is ${DateTime.now()
             .setZone(result.timezone)
             .toLocaleString(DateTime.DATETIME_MED)}. (tz \`${
             result.timezone
           }\`)`
         );
-        break;
       case "timezone":
         let value = interaction.options.getString("where");
         if (!timezone.tz.zone(value)) {
@@ -100,79 +179,33 @@ module.exports.run = {
             ephemeral: true,
           });
         }
-        interaction.reply(
+        return interaction.reply(
           `The time in **tz \`${value}\`** is ${DateTime.now()
             .setZone(value)
             .toLocaleString(DateTime.DATETIME_MED)}.`
         );
-        break;
       case "compare":
         await interaction.deferReply();
-        let auth = await db.collection("profiles").findOne({ user: interaction.user.id });
-        if (!auth) {
-          interaction.deleteReply();
-          if (user.id == interaction.user.id)
-            await interaction.followUp({
-              content:
-                "Please register your timezone first with `/profile edit timezone`.",
-              ephemeral: true,
-            });
-          return;
-        }
-
-        user = interaction.options.getUser("user");
-        if (user) {
-          result = await db.collection("profiles").findOne({ user: user.id });
-          if (!result || result.timezone == null) {
-            return interaction.editReply(
-              "This user doesn't have a time zone set."
-            );
-          }
-        } else
-          result = await db
-            .collection("profiles")
-            .find({ timezone: { $not: { $eq: null } } })
-            .toArray();
-
-        let providedTime = interaction.options.getString("time");
-        let time: DateTime;
-
-        if (providedTime) {
-          try {
-            time = DateTime.fromFormat(providedTime, "d/L/y t", {zone: auth.timezone});
-          } catch {
-            return interaction.editReply(
-              'This time is invalid. Make sure it is in format "d/m/yyyy, h:mm am/pm".'
-            );
-          }
-        } else {
-          time = DateTime.now();
-        }
-
-        let em = new MessageEmbed();
-        if (result instanceof Array) {
-          let tz: Array<string> = [];
-          result.forEach((item) => {
-            if (!tz.includes(item.timezone)) tz.push(item.timezone);
+        user = interaction.options.getUser("who");
+        time = interaction.options.getInteger("time").toString();
+        try {
+          em = await TimeConvert.compareUser(user, db, time);
+        } catch (err) {
+          return interaction.editReply({
+            content: `**An error occurred**: ${err}`,
           });
-          let ar: Array<string> = [];
-          tz.forEach((item) => {
-            ar.push(
-              `**${item}**: ${time.setZone(item).toFormat("d MMMM y t")}`
-            );
+        }
+        return interaction.editReply({ embeds: [em] });
+      case "world":
+        await interaction.deferReply();
+        time = interaction.options.getInteger("time");
+        if (time) result = await db.collection("profiles").findOne({ user: interaction.user.id })
+        try {
+          em = await TimeConvert.compareWorld(db, time, (result.timezone ? result.timezone : "GMT"));
+        } catch (err) {
+          return interaction.editReply({
+            content: `**An error occurred**: ${err}`,
           });
-          em.setTitle(
-            `**${time.setZone(auth.timezone).toFormat("d MMMM y t")}** for ${interaction.user.username} is...`
-          ).setDescription(ar.join("\n"))
-          .setFooter({text: "Is your timezone not on this list? Make sure you've registered your timezone with /profile register timezone."});
-        } else {
-          em.setTitle(
-            `**${time.setZone(auth.timezone).toFormat("d MMMM y t")}** for ${interaction.user.username} is...`
-          ).setDescription(
-            `**${time.setZone(result.timezone).toFormat("d MMMM y t")}** for <@!${
-              user.id
-            }>.`
-          );
         }
         return interaction.editReply({ embeds: [em] });
     }
