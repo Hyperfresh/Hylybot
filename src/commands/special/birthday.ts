@@ -3,6 +3,8 @@ import { CommandInteraction } from "discord.js";
 import { DateTime } from "luxon";
 import { Db } from "mongodb";
 
+// View the birthday of someone.
+
 module.exports.run = {
   data: new SlashCommandBuilder()
     .setName("birthday")
@@ -14,9 +16,11 @@ module.exports.run = {
         .setRequired(false)
     ),
   async execute(interaction: CommandInteraction, db: Db) {
+    // Check if a user was supplied, otherwise use the user who invoked the command.
     await interaction.deferReply();
     let user = interaction.options.getUser("user");
     if (!user) user = interaction.user;
+    // Search on the database for a result.
     let result = await db.collection("profiles").findOne({ user: user.id });
     if (!result || result.bday == "Unknown") {
       interaction.editReply("This user hasn't registered their birthday.");
@@ -27,6 +31,7 @@ module.exports.run = {
         });
       return;
     }
+    // Get their name and birthday (stored as a string), and split the strings into an array
     let nameResult: string = result.name;
     let nameArray: Array<string> = nameResult.split(" ");
     let bdayResult: string = result.bday;
@@ -38,10 +43,11 @@ module.exports.run = {
     else bdayParse = `${bdayArray[0]} ${bdayArray[1]} ${now.year}`;
     let bday = DateTime.fromFormat(bdayParse, "d LLL yyyy");
     let length = bday.diff(now);
-    let birthday;
+    let birthday: string;
     console.log(bdayParse, bday, length);
+    // Change the text depending how close the birthday is
     if (length.toMillis() <= 604800000) {
-      let remain;
+      let remain: string;
       if (length.toMillis() <= 86400000) {
         remain = length.toFormat("h m");
         let split: Array<string> = remain.split(" ");
@@ -64,7 +70,7 @@ module.exports.run = {
         } minutes ago.`;
       }
     }
-
+    // Reply to interaction.
     if (!birthday) birthday = `is on ${bday.toFormat("dd LLL")}.`;
     interaction.editReply(`**${nameArray[0]}**'s birthday ${birthday}`);
   },
