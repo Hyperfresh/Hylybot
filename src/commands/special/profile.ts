@@ -36,7 +36,6 @@ import {
  * @param {User} user User object
  * @param {Guild} guild Guild object
  */
-
 export async function createEmbed(
   db: Db,
   client: Client,
@@ -374,9 +373,9 @@ const setupMinecraft = new MessageEmbed()
   );
 /*
 Helpful regex shit
-/^([0-9]{9})$/
-/^((31(?!\ (Feb(ruary)?|Apr(il)?|June?|(Sep(?=\b|t)t?|Nov)(ember)?)))|((30|29)(?!\ Feb(ruary)?))|(29(?=\ Feb(ruary)?\ (((1[6-9]|[2-9]\d)(0[48]|[2468][048]|[13579][26])|((16|[2468][048]|[3579][26])00)))))|(0?[1-9])|1\d|2[0-8])\ (Jan(uary)?|Feb(ruary)?|Ma(r(ch)?|y)|Apr(il)?|Ju((ly?)|(ne?))|Aug(ust)?|Oct(ober)?|(Sep(?=\b|t)t?|Nov|Dec)(ember)?)$/
-/(SW-[0-9]{4}-[0-9]{4}-[0-9]{4})/
+Genshin UID: /^([0-9]{9})$/
+Birthday Checking: /^((31(?!\ (Feb(ruary)?|Apr(il)?|June?|(Sep(?=\b|t)t?|Nov)(ember)?)))|((30|29)(?!\ Feb(ruary)?))|(29(?=\ Feb(ruary)?\ (((1[6-9]|[2-9]\d)(0[48]|[2468][048]|[13579][26])|((16|[2468][048]|[3579][26])00)))))|(0?[1-9])|1\d|2[0-8])\ (Jan(uary)?|Feb(ruary)?|Ma(r(ch)?|y)|Apr(il)?|Ju((ly?)|(ne?))|Aug(ust)?|Oct(ober)?|(Sep(?=\b|t)t?|Nov|Dec)(ember)?)$/
+Nintendo Switch FC: /(SW-[0-9]{4}-[0-9]{4}-[0-9]{4})/
 */
 
 module.exports.run = {
@@ -603,10 +602,12 @@ module.exports.run = {
         )
     ),
   async execute(type: any, db: Db) {
+    // Is the interaction a button type?
     if (type.isButton()) {
       let interaction: ButtonInteraction = type;
       await interaction.deferUpdate();
       switch (interaction.customId) {
+        // Is the interaction something to do with Pride badges?
         case "viewPride":
         case "gay":
         case "les":
@@ -625,6 +626,7 @@ module.exports.run = {
         case "clearPride":
           await buttonHelper.buttonBadge(interaction, db);
           break;
+        // Is the interaction something to do with clearing gametags?
         case "clearGenshin":
         case "clearFC":
         case "clearMC":
@@ -632,13 +634,14 @@ module.exports.run = {
         case "clearFortnite":
           await buttonHelper.clearGametag(interaction, db);
           break;
+        // Is the interaction a request to create a profile?
         case "create":
           await buttonHelper.setupProfile(interaction, db);
           break;
       }
       return;
     }
-
+    // Interaction probably a command, not a button.
     let interaction: CommandInteraction = type;
     let test: string;
     try {

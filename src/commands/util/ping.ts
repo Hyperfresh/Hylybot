@@ -30,7 +30,7 @@ module.exports.run = {
       await interaction.reply(
         `> **Pong!**\n🏓 **Latency**: ${
           Date.now() - interaction.createdTimestamp
-        }\n🔌 **Socket**: ${Math.ceil(interaction.client.ws.ping)}ms`
+        }ms\n🔌 **Socket**: ${Math.ceil(interaction.client.ws.ping)}ms`
       );
     }
   },

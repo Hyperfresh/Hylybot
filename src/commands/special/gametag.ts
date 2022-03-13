@@ -7,6 +7,8 @@ import {
   updateMinecraft,
 } from "../../helpers/minecraft-helper";
 
+// View gametags of a user.
+
 function notThere(interaction: CommandInteraction, user: User) {
   interaction.editReply("This user hasn't registered this gametag.");
   if (user.id == interaction.user.id)
@@ -38,14 +40,14 @@ module.exports.run = {
         .setRequired(false)
     ),
   async execute(interaction: CommandInteraction, db: Db) {
+    // Check if a user was supplied, otherwise use the user who invoked the command.
     await interaction.deferReply();
     let user = interaction.options.getUser("user");
     if (!user) user = interaction.user;
     let result = await db.collection("profiles").findOne({ user: user.id });
-    if (!result) {
-      notThere(interaction, user);
-      return;
-    }
+    // If no result, tell the user so.
+    if (!result) return notThere(interaction, user);
+    // Show tags depending on which was given. A library may also be used
     switch (interaction.options.getString("tag")) {
       case "genshin":
         if (!result.gametags.genshin) {

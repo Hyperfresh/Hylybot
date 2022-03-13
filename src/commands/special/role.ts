@@ -2,7 +2,12 @@
 // Thanks to http://github.com/iwa for the original code!
 
 import { SlashCommandBuilder } from "@discordjs/builders";
-import { MessageActionRow, MessageButton } from "discord.js";
+import {
+  Guild,
+  MessageActionRow,
+  MessageButton,
+  MessageEmbed,
+} from "discord.js";
 import { Db } from "mongodb";
 
 const colourButton = new MessageActionRow().addComponents(
@@ -43,6 +48,44 @@ const colours = [
   { name: "blurpleNew", hex: "5865f2" },
 ];
 
+async function customIcon(
+  role: string,
+  guild: Guild,
+  icon: string
+): Promise<MessageEmbed> {
+  if (guild.premiumTier != ("TIER_2" || "TIER_3"))
+    return new MessageEmbed()
+      .setTitle(
+        "Oh no! The server's Boost Level isn't high enough to add your role icon!"
+      )
+      .setDescription(
+        `Role icons require Boost Level \`TIER_2\` or higher. This server's current Boost Level is \`${guild.premiumTier}\`.`
+      )
+      .setFooter({
+        text: "We don't usually beg for server boosts. However, if you want role icons unlocked, you should probably start begging!",
+      })
+      .setColor("RED");
+
+  let e = await guild.roles.fetch(role);
+  try {
+    await e.setIcon(icon);
+    return new MessageEmbed()
+      .setTitle("Role icon updated.")
+      .setThumbnail(icon)
+      .setColor("GREEN");
+  } catch (err) {
+    return new MessageEmbed()
+      .setTitle("An error occurred.")
+      .setDescription(
+        `Attempted to set icon \`${icon}\`. Got error \`${err}\`.`
+      )
+      .setFooter({
+        text: "If this error is not due to server boosting, please report it to the bot developer.",
+      })
+      .setColor("RED");
+  }
+}
+
 module.exports.run = {
   data: new SlashCommandBuilder()
     .setName("role")
@@ -59,11 +102,14 @@ module.exports.run = {
             .setRequired(true)
             .addChoice("Role name", "role_name")
             .addChoice("Role colour", "role_colour")
+            .addChoice("Role icon", "role_icon")
         )
         .addStringOption((option) =>
           option
             .setName("value")
-            .setDescription("This would be your role name, or hex colour.")
+            .setDescription(
+              "This would be your role name, hex colour or icon URL."
+            )
             .setRequired(true)
         )
     )
@@ -82,6 +128,14 @@ module.exports.run = {
             .setName("role_colour")
             .setDescription("The colour of your new role.")
             .setRequired(true)
+        )
+        .addStringOption((opt) =>
+          opt
+            .setName("role_icon")
+            .setDescription(
+              "(Optional) URL of custom role icon to display next to your name."
+            )
+            .setRequired(false)
         )
     )
     .addSubcommand((subCommand) =>
@@ -157,9 +211,9 @@ module.exports.run = {
             name: interaction.options.getString("role_name"),
             color: rolecolour,
             hoist: false,
-            position: 26,
+            position: 32,
           })
-          .then((role) => {
+          .then(async (role) => {
             const data = {
               user: String(interaction.user.id),
               role: String(role.id),
@@ -169,6 +223,11 @@ module.exports.run = {
             interaction.editReply(
               `Your custom role was created: <@&${role.id}>`
             );
+            let icon = interaction.options.getString("role_icon");
+            if (icon) {
+              let res = await customIcon(role, interaction.guild, icon);
+              return interaction.followUp({embeds: [res], ephemeral: true})
+            }
           })
           .catch(console.error);
         break;
@@ -179,52 +238,59 @@ module.exports.run = {
           );
           return;
         }
-        if (interaction.options.getString("item") == "role_name") {
-          // Edit role name
-          interaction.guild.roles
-            .fetch(search.role)
-            .then((role) => {
-              role.edit({ name: interaction.options.getString("value") });
-              interaction.editReply(
-                `Your custom role's name was edited: <@&${role.id}>`
-              );
-            })
-            .catch(console.error);
-        } else {
-          if (
-            !/^#?(?:[0-9a-fA-F]{3}){1,2}$/.test(
-              // Edit role colour
-              interaction.options.getString("value")
-            )
-          ) {
-            __FOUND = colours.find(function (colour) {
-              if (colour.name == interaction.options.getString("value"))
-                return true;
-            });
-            if (__FOUND) {
-              rolecolour = __FOUND.hex;
-            } else {
-              interaction.editReply({
-                content:
-                  "The colour you provided was wrong. It must be provided as a hex code, such as `#123abc`.\n\n*Need help choosing a colour? Try one of the buttons below.*",
-                components: [colourButton],
+        switch (interaction.options.getString("item")) {
+          case "role_name":
+            // Edit role name
+            interaction.guild.roles
+              .fetch(search.role)
+              .then((role) => {
+                role.edit({ name: interaction.options.getString("value") });
+                interaction.editReply(
+                  `Your custom role's name was edited: <@&${role.id}>`
+                );
+              })
+              .catch(console.error);
+            break;
+          case "role_colour":
+            // Edit role colour
+            if (
+              !/^#?(?:[0-9a-fA-F]{3}){1,2}$/.test(
+                interaction.options.getString("value")
+              )
+            ) {
+              __FOUND = colours.find((colour) => {
+                if (colour.name == interaction.options.getString("value"))
+                  return true;
               });
-              return;
+              if (__FOUND) rolecolour = __FOUND.hex;
+              else
+                return interaction.editReply({
+                  content:
+                    "The colour you provided was wrong. It must be provided as a hex code, such as `#123abc`.\n\n*Need help choosing a colour? Try one of the buttons below.*",
+                  components: [colourButton],
+                });
+            } else {
+              if (interaction.options.getString("value").charAt(0) == "#")
+                rolecolour = interaction.options
+                  .getString("value")
+                  .substring(1);
+              else rolecolour = interaction.options.getString("value");
             }
-          } else {
-            if (interaction.options.getString("value").charAt(0) == "#")
-              rolecolour = interaction.options.getString("value").substring(1);
-            else rolecolour = interaction.options.getString("value");
-          }
-          interaction.guild.roles
-            .fetch(search.role)
-            .then((role) => {
-              role.edit({ color: rolecolour });
-              interaction.editReply(
-                `Your custom role's colour was edited: <@&${role.id}>`
-              );
-            })
-            .catch(console.error);
+            interaction.guild.roles
+              .fetch(search.role)
+              .then((role) => {
+                role.edit({ color: rolecolour });
+                interaction.editReply(
+                  `Your custom role's colour was edited: <@&${role.id}>`
+                );
+              })
+              .catch(console.error);
+            break;
+          case "role_icon":
+            let role = await interaction.guild.roles.fetch(search.role)
+            let icon = interaction.options.getString("value")
+            let res = await customIcon(role, interaction.guild, icon);
+            return interaction.reply({embeds: [res], ephemeral: true})
         }
         break;
       case "remove": // Delete a role

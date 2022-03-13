@@ -1,6 +1,9 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
 import { CommandInteraction } from "discord.js";
 
+// Random fun command that Lili suggested I make because Lilipond breaks my bot a lot.
+// Below is a list of messages that Hylybot can output, at random order.
+
 let breakMessages = [
   "oh no you have broken me!",
   "Oh no, hairpins busted",

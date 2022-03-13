@@ -24,6 +24,7 @@ if (!/^(v([1-9][6-9]+\.)?(\d+\.)?(\d+))$/.test(process.version)) {
   );
 }
 
+// Core discord.js components.
 import * as Discord from "discord.js";
 const bot: Discord.Client = new Discord.Client({
   retryLimit: 5,
@@ -35,26 +36,25 @@ const bot: Discord.Client = new Discord.Client({
   ],
 });
 const commands: Discord.Collection<any, any> = new Discord.Collection();
+import ready from "./events/ready";
+import { REST } from "@discordjs/rest";
+import { Routes } from "discord-api-types/v9";
 
+// File manipulation setup and configuration setup.
 import * as fs from "fs";
-
 import { jsonc } from "jsonc";
 let configData = fs.readFileSync("./data/config.jsonc", "utf8");
 let config = jsonc.parse(configData);
 
+// Export key variables.
 export { config, bot };
 
+// Set up database.
 import { MongoClient, Db } from "mongodb";
 const url = config.MONGO_URL,
   dbName = config.MONGO_DBNAME;
 
-
-
-import ready from "./events/ready";
-
-import { REST } from "@discordjs/rest";
-import { Routes } from "discord-api-types/v9";
-
+// Set up Starboard.
 import { Starboard, StarboardDefaultCreateOptions } from "discord-starboards"
 const StarboardManager: any = require("discord-starboards")
 const StarboardsManagerCustomDb: any = class extends StarboardManager {
@@ -84,6 +84,11 @@ const StarboardsManagerCustomDb: any = class extends StarboardManager {
 const manager = new StarboardsManagerCustomDb(bot, {storage: false, ignoredChannels: []})
 export { manager }
 
+/**
+ * Retrieve a configuration value stored on Hylybot's MongoDB database.
+ * @param str Value to retrieve.
+ * @returns Configuration value.
+ */
 export async function getDbConfig(str: string): Promise<any> {
   let mongod = await MongoClient.connect(url)
   let db = mongod.db(dbName)
@@ -91,8 +96,8 @@ export async function getDbConfig(str: string): Promise<any> {
   return res.value
 }
 
+// Create commands and push them to Discord.js REST.
 let commandsToPush = [];
-
 fs.readdir("./build/commands/", { withFileTypes: true }, (error, f) => {
   if (error) return console.error(error);
   f.forEach((f) => {
