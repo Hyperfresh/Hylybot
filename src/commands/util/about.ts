@@ -68,7 +68,7 @@ async function aboutServer(guild: Discord.Guild) {
       "<@!457350691296641025>\n<@!230209666435514368>",
       true
     )
-    .setImage(guild.bannerURL())
+    .setImage(guild.bannerURL({size: 4096}))
 
   return aboutServerEmbed;
 }

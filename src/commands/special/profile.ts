@@ -671,7 +671,7 @@ module.exports.run = {
             embeds: [embed],
           });
         } else {
-          interaction.editReply("This user does not have a server proile.");
+          interaction.editReply("This user does not have a server profile.");
           if (interaction.user.id == user.id) {
             await interaction.followUp({
               embeds: [setupProfile],
