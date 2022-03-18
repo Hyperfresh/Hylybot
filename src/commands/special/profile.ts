@@ -888,10 +888,7 @@ module.exports.run = {
             break;
           case "image":
             value = interaction.options.getString("url");
-            if (!isImageURL(value)) {
-              interaction.editReply("Your image URL is invalid.");
-              return;
-            }
+            if (!await isImageURL(value)) return interaction.editReply("Your image URL is invalid.");
             db.collection("profiles").updateOne(
               { user: interaction.user.id },
               { $set: { image: value } }

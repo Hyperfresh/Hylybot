@@ -8,7 +8,11 @@ import {
   MessageButton,
   MessageEmbed,
 } from "discord.js";
+import isImageURL from "image-url-validator";
 import { Db } from "mongodb";
+
+import fetch from "node-fetch";
+import sharp = require("sharp");
 
 const colourButton = new MessageActionRow().addComponents(
   new MessageButton()
@@ -49,7 +53,7 @@ const colours = [
 ];
 
 async function customIcon(
-  role: string,
+  role: any,
   guild: Guild,
   icon: string
 ): Promise<MessageEmbed> {
@@ -66,24 +70,45 @@ async function customIcon(
       })
       .setColor("RED");
 
-  let e = await guild.roles.fetch(role);
-  try {
-    await e.setIcon(icon);
-    return new MessageEmbed()
-      .setTitle("Role icon updated.")
-      .setThumbnail(icon)
-      .setColor("GREEN");
-  } catch (err) {
-    return new MessageEmbed()
-      .setTitle("An error occurred.")
-      .setDescription(
-        `Attempted to set icon \`${icon}\`. Got error \`${err}\`.`
-      )
-      .setFooter({
-        text: "If this error is not due to server boosting, please report it to the bot developer.",
-      })
-      .setColor("RED");
-  }
+      if (!await isImageURL(icon)) return new MessageEmbed().setTitle("Your image URL is invalid.").setColor("RED");
+
+  let role_icon: any = await fetch(icon)
+    .then(res => res.buffer())
+    .then(buf => sharp(buf)
+      .png({compressionLevel: 9})
+      .toBuffer())
+    .catch(err => {
+      return new MessageEmbed()
+        .setTitle("An error occurred.")
+        .setDescription(
+          `Attempted to compress icon \`${icon}\`. Got error \`${err}\`.`
+        )
+        .setFooter({text: "Please report this error to the bot developer."})
+        .setColor("RED")
+    })
+
+  if (role_icon instanceof MessageEmbed) return role_icon
+   
+  return guild.roles
+    .fetch(role.id)
+    .then((e) => {
+      e.setIcon(role_icon);
+      return new MessageEmbed()
+        .setTitle("Role icon updated.")
+        .setThumbnail(icon)
+        .setColor("GREEN");
+    })
+    .catch((err) => {
+      return new MessageEmbed()
+        .setTitle("An error occurred.")
+        .setDescription(
+          `Attempted to set icon \`${icon}\`. Got error \`${err}\`.`
+        )
+        .setFooter({
+          text: "If this error is not due to server boosting, please report it to the bot developer.",
+        })
+        .setColor("RED");
+    });
 }
 
 module.exports.run = {
@@ -226,7 +251,7 @@ module.exports.run = {
             let icon = interaction.options.getString("role_icon");
             if (icon) {
               let res = await customIcon(role, interaction.guild, icon);
-              return interaction.followUp({embeds: [res], ephemeral: true})
+              return interaction.followUp({ embeds: [res], ephemeral: true });
             }
           })
           .catch(console.error);
@@ -287,10 +312,10 @@ module.exports.run = {
               .catch(console.error);
             break;
           case "role_icon":
-            let role = await interaction.guild.roles.fetch(search.role)
-            let icon = interaction.options.getString("value")
+            let role = await interaction.guild.roles.fetch(search.role);
+            let icon = interaction.options.getString("value");
             let res = await customIcon(role, interaction.guild, icon);
-            return interaction.reply({embeds: [res], ephemeral: true})
+            return interaction.editReply({ embeds: [res], ephemeral: true });
         }
         break;
       case "remove": // Delete a role
