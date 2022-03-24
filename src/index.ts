@@ -1,5 +1,5 @@
 var copy = String(`
-Hylybot - yet another custom Discord bot, built in TypeScript
+Hylybot - the custom-built Discord bot for the Hyla + Friends server.
 Copyright (C) 2021 Hyla A | https://github.com/Hyperfresh/Hylybot
 
 This program is free software: you can redistribute it and/or modify
@@ -175,7 +175,7 @@ bot.on("interactionCreate", async (interaction) => {
     let profileButtonID = [
       "viewPride",
       "gay",
-      "lesbian",
+      "les",
       "bi",
       "pan",
       "ace",

@@ -7,13 +7,14 @@ open-source software. Here are the OSS softwares used and its licenses!
 
 ## Adapted code
 
-The software `Myu-Bot` (https://github.com/Hyperfresh/Myu-Bot), which in turn is a fork of `Q-Bot` (repository no longer exists, original: https://github.com/iwa/q-bot), has been adapted with modifications to serve as the code base for Hylybot. This includes, but is not limited to
+The software `Myu-Bot` (https://github.com/Hyperfresh/Myu-Bot), which in turn is a fork of `Q-Bot` (repository no longer exists, original: https://github.com/iwa/q-bot), has been adapted with modifications to serve as some of the code base for Hylybot. This includes, but is not limited to
 
 - the structure of the `index.ts` file
 - the base structure for interaction commands
 - directory structure
 - TypeScript configurations
-- starboards
+- some starboard configurations
+- suggestion box features
 
 According to the repository's package.json, this software contains the following license and notice below:
 
@@ -1817,6 +1818,58 @@ Public License instead of this License.  But first, please read
 ---
 
 ## Hylybot Core Libraries
+
+### Outline
+
+The following list outlines software that may be included in this product,
+as well as the functions that the library carries out.
+**@discordjs/builders, @discordjs/rest, discord.js, discord-api-types**
+- Libraries that interface with the Discord bot API
+- Pretty much the heart of Hylybot and won't work without it
+
+**@types/js-yaml, @types/luxon, @types/node, @types/ping, @types/sharp, @types/ws, @types/xml2js**
+- Type definitions for coding and building in TypeScript
+
+**image-url-validator**
+- Checks if a URL points to a valid image
+
+**js-yaml**
+- Reads through YAML configuration files used in PaperMC-powered Minecraft servers
+
+**jsonc**
+- Reads through JSON configuration files used for Hylybot which also contain comments
+
+**luxon, moment-timezone**
+- Handles time parsing
+
+**minecraft-player**
+- Looks up a Minecraft player on the Mojang database
+
+**money, open-exchange-rates**
+- checks currency conversion rates
+
+**mongodb**
+- database driver for MongoDB
+
+**node-bash, node-powershell**
+- run commands on the computer
+
+**node-fetch, xml2js**
+- fetch bushfire alerts
+- do some other stuff that requires fetching things from the internet
+
+**ping**
+- pings websites
+
+**sharp**
+- compresses images
+
+**typescript**
+- Builds this project into JavaScript
+
+The licenses and copyright notices for the mentioned software can be found below.
+
+---
 
 The following software may be included in this product: `@discord.js/builders`.
 A copy of the source code may be downloaded at https://github.com/discordjs/builders.
