@@ -34,6 +34,26 @@ async function executeShell(cmd) {
   return result.raw;
 }
 
+async function update() {
+  const ps = new PowerShell({
+    executableOptions: {
+      "-ExecutionPolicy": "Bypass",
+      "-NoProfie": true
+    }
+  })
+  let result
+  try {
+    result = await ps.invoke("../../update.ps1")
+  } catch (err) {
+    await ps.dispose()
+    console.log(err)
+    return err
+  }
+  await ps.dispose()
+  console.log(await result)
+  return result.raw
+}
+
 async function executePwsh(cmd) {
   const ps = new PowerShell({
     debug: true,
@@ -61,6 +81,9 @@ module.exports.run = {
     .setDescription("Bot owner command.")
     .addSubcommand((sub) =>
       sub.setName("stop").setDescription("Bot owner command.")
+    )
+    .addSubcommand((sub) =>
+      sub.setName("update").setDescription("Bot owner command.")
     )
     .addSubcommand((sub) =>
       sub
@@ -94,6 +117,16 @@ module.exports.run = {
       return;
     }
     switch (interaction.options.getSubcommand()) {
+      case "update":
+        await interaction.deferReply({ ephemeral: true });
+        interaction.editReply(`\`\`\`ps\n${await update()}\`\`\``)
+        await interaction.followUp("🛑 > Shutting down after update. Please reboot manually.");
+        interaction.client.user.setStatus("invisible");
+        setTimeout(() => {
+          interaction.client.destroy();
+          process.exit();
+        }, 3000);
+        break;
       case "stop":
         await interaction.reply("🛑 > Shutting down.");
         interaction.client.user.setStatus("invisible");

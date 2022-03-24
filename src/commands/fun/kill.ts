@@ -39,7 +39,8 @@ function killMessage(user: User, target: User): string {
         `<@!${target.id}> drank too much pilk and died`, // Submitted by David R
         `<@!${user.id}> picked <@!${target.id}>'s mario party main`, // Submitted by Zoe H
         `<@!${user.id}> just got <@!${target.id}> luigi'd and couldn't handle Luigi's presence`, // Submitted by David R
-        `<@!${user.id}> convinced <@!${target.id}> to go down a sewer slide.` // Submitted by Hyla A
+        `<@!${user.id}> convinced <@!${target.id}> to go down a sewer slide.`, // Submitted by Hyla A
+        `<@!${user.id}> hurled <@!${target.id}> into the sun` // Submitted by David R
     ]
     let item = Math.random() * (messages.length - 1)
     return messages[item.toFixed(0)]
