@@ -32,7 +32,13 @@ async function aboutBot(client: Discord.Client) {
     .setThumbnail(client.user.avatarURL({ size: 1024 }))
     .setColor(client.user.accentColor)
     .setDescription(
-      `<@!${client.user.id}> is a custom-built Discord bot for the *Hyla + Friends* server, coded in TypeScript.`
+      `<@!${client.user.id}> is a custom-built Discord bot for the *Hyla + Friends* server, coded in TypeScript.
+      I'm fully free and open-source - anyone can contribute to make Hylybot better! [Learn more here.](https://github.com/Hyperfresh/Hylybot)
+      
+      📍 Hyla, the bot developer, pays deepest respects to the Kaurna people, the traditional owners of the land on which this server is hosted.
+      Hyla acknowledges the Kaurna elders past, present and emerging. The land always has been, and always will be, under Kaurna ownership.`
+      // Whoever is hosting this: please acknowledge the land on which your copy of Hylybot is run on with the template above.
+      // Acknowledge the people who came before you did, and acknowledge that it always was (and always is) their land.
     )
     .addField(
       "Server information",
