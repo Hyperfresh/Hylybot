@@ -57,7 +57,7 @@ async function customIcon(
   guild: Guild,
   icon: string
 ): Promise<MessageEmbed> {
-  if (guild.premiumTier != ("TIER_2" || "TIER_3"))
+  if (!(guild.premiumTier == "TIER_2" || guild.premiumTier == "TIER_3"))
     return new MessageEmbed()
       .setTitle(
         "Oh no! The server's Boost Level isn't high enough to add your role icon!"
