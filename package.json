@@ -39,7 +39,7 @@
     "money": "^0.2.0",
     "mongodb": "^4.4.1",
     "node-bash": "^5.0.1",
-    "node-fetch": "^2.6.7",
+    "node-fetch": "^3.2.3",
     "node-powershell": "^5.0.1",
     "open-exchange-rates": "^0.3.0",
     "ping": "^0.4.1",
