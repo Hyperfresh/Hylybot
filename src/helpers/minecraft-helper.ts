@@ -35,12 +35,14 @@ export async function updateMinecraft(db: Db, user: string) {
 
 /**
  * Fetches the Minecraft username and server nickname from a UUID
- * @param uuid: Minecraft User ID.
+ * @param uuid - Minecraft User ID.
+ * @param hide_nick - [Optional] Hide nickname in returned result.
  */
-export async function parseMinecraft(uuid: string) {
+export async function parseMinecraft(uuid: string, hide_nick?: boolean): Promise<string> {
   let mcUser = await minecraftPlayer(uuid);
   let username = mcUser.username;
   try {
+    if (hide_nick) throw new Error
     let document: any = load(
       fs.readFileSync(`${userData}/${uuid}.yml`, "utf8")
     );
