@@ -43,7 +43,7 @@
     "node-powershell": "^5.0.1",
     "open-exchange-rates": "^0.3.0",
     "ping": "^0.4.1",
-    "sharp": "^0.30.3",
+    "sharp": "^0.30.4",
     "typescript": "^4.6.3",
     "xml2js": "^0.4.23"
   }
