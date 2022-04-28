@@ -94,9 +94,11 @@ module.exports.run = {
             .setName("method")
             .setDescription("What eval method?")
             .setRequired(true)
-            .addChoice("Node", "js")
-            .addChoice("Bash", "sh")
-            .addChoice("Pwsh", "pw")
+            .addChoices(
+              {name: "Node", value: "js"},
+              {name: "Bash", value: "sh"},
+              {name: "Pwsh", value: "pw"}
+            )
         )
         .addStringOption((opt) =>
           opt

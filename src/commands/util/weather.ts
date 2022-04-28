@@ -174,8 +174,10 @@ module.exports.run = {
                 .setName("measurement")
                 .setDescription("What measurement? Celsius is default.")
                 .setRequired(false)
-                .addChoice("Celsius / Metric", "metric")
-                .addChoice("Fahrenheit / Imperial", "imperial")
+                .addChoices(
+                  {name: "Celsius / Metric", value: "metric"},
+                  {name: "Fahrenheit / Imperial", value: "imperial"}
+                )
             )
         )
         .addSubcommand((sub) =>
@@ -216,8 +218,10 @@ module.exports.run = {
             .setName("measurement")
             .setDescription("What measurement? Celsius is default.")
             .setRequired(false)
-            .addChoice("Celsius / Metric", "metric")
-            .addChoice("Fahrenheit / Imperial", "imperial")
+            .addChoices(
+              {name: "Celsius / Metric", value: "metric"},
+              {name: "Fahrenheit / Imperial", value: "imperial"}
+            )
         )
     ),
   async execute(interaction: CommandInteraction, db: Db) {

@@ -125,9 +125,11 @@ module.exports.run = {
             .setName("item")
             .setDescription("Which item would you like to edit?")
             .setRequired(true)
-            .addChoice("Role name", "role_name")
-            .addChoice("Role colour", "role_colour")
-            .addChoice("Role icon", "role_icon")
+            .addChoices(
+              {name: "Role name", value: "role_name"},
+              {name: "Role colour", value: "role_colour"},
+              {name: "Role icon", value: "role_icon"}
+            )
         )
         .addStringOption((option) =>
           option

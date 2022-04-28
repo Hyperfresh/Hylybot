@@ -27,11 +27,13 @@ module.exports.run = {
         .setName("tag")
         .setDescription("Which tag do you want to look at?")
         .setRequired(true)
-        .addChoice("Nintendo Switch", "switch")
-        .addChoice("Fortnite", "fortnite")
-        .addChoice("Genshin Impact", "genshin")
-        .addChoice("Nintendo Switch", "switch")
-        .addChoice("Minecraft", "mc")
+        .addChoices(
+          {name: "Nintendo Switch", value: "switch"},
+          {name: "Fortnite", value: "fortnite"},
+          {name: "Genshin Impact", value: "genshin"},
+          {name: "Nintendo Switch", value: "switch"},
+          {name: "Minecraft", value: "mc"}
+        )
     )
     .addUserOption((option) =>
       option

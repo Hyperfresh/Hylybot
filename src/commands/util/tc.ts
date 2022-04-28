@@ -10,8 +10,10 @@ module.exports.run = {
       option
         .setName("temp")
         .setDescription("What temperature unit are you converting from?")
-        .addChoice("Celsius", "C")
-        .addChoice("Fahrenheit", "F")
+        .addChoices(
+          {name: "Celsius", value: "C"},
+          {name: "Fahrenheit", value: "F"}
+        )
         .setRequired(true)
     )
     .addNumberOption((option) =>
