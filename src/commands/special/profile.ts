@@ -457,18 +457,20 @@ module.exports.run = {
                     .setName("month")
                     .setDescription("What month were you born on?")
                     .setRequired(true)
-                    .addChoice("January", "Jan")
-                    .addChoice("February", "Feb")
-                    .addChoice("March", "Mar")
-                    .addChoice("April", "Apr")
-                    .addChoice("May", "May")
-                    .addChoice("June", "Jun")
-                    .addChoice("July", "Jul")
-                    .addChoice("August", "Aug")
-                    .addChoice("September", "Sep")
-                    .addChoice("October", "Oct")
-                    .addChoice("November", "Nov")
-                    .addChoice("December", "Dec")
+                    .addChoices(
+                      {name: "January", value: "Jan"},
+                      {name: "February", value: "Feb"},
+                      {name: "March", value: "Mar"},
+                      {name: "April", value: "Apr"},
+                      {name: "May", value: "May"},
+                      {name: "June", value: "Jun"},
+                      {name: "July", value: "Jul"},
+                      {name: "August", value: "Aug"},
+                      {name: "September", value: "Sep"},
+                      {name: "October", value: "Oct"},
+                      {name: "November", value: "Nov"},
+                      {name: "December", value: "Dec"}
+                    )
               )
               .addIntegerOption(
                 (
@@ -492,11 +494,12 @@ module.exports.run = {
                 option
                   .setName("item")
                   .setDescription("Which game or console?")
-                  .setRequired(true)
-                  .addChoice("Fortnite", "fortnite")
-                  .addChoice("Genshin Impact", "genshin")
-                  .addChoice("Nintendo Switch", "switch")
-                  .addChoice("Minecraft", "mc")
+                  .addChoices(
+                    {name: "Nintendo Switch", value: "switch"},
+                    {name: "Fortnite", value: "fortnite"},
+                    {name: "Genshin Impact", value: "genshin"},
+                    {name: "Minecraft", value: "mc"}
+                  )
               )
               .addStringOption((option) =>
                 option
@@ -588,17 +591,19 @@ module.exports.run = {
             .setName("field")
             .setDescription("Choose the field to clear.")
             .setRequired(true)
-            .addChoice("💥 CLEAR EVERYTHING", "delete")
-            .addChoice("Name", "name")
-            .addChoice("Birthday & age", "bday")
-            .addChoice("Age only", "age")
-            .addChoice("Bio", "bio")
-            .addChoice("Pride badges", "badges")
-            .addChoice("Pronouns", "pronouns")
-            .addChoice("Gametags", "gametag")
-            .addChoice("Colour", "colour")
-            .addChoice("Time zone", "timezone")
-            .addChoice("Image", "image")
+            .addChoices(
+              {name: "💥 CLEAR EVERYTHING", value: "delete"},
+              {name: "Name", value: "name"},
+              {name: "Birthday & age", value: "bday"},
+              {name: "Age only", value: "age"},
+              {name: "Bio", value: "bio"},
+              {name: "Pride badges", value: "badges"},
+              {name: "Pronouns", value: "pronouns"},
+              {name: "Gametags", value: "gametag"},
+              {name: "Colour", value: "colour"},
+              {name: "Time zone", value: "timezone"},
+              {name: "Image", value: "image"}
+            )
         )
     ),
   async execute(type: any, db: Db) {

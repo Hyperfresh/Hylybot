@@ -1,4 +1,5 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
+import { ChannelType } from "discord-api-types/v10";
 import { CommandInteraction, MessageEmbed } from "discord.js";
 import { Db } from "mongodb";
 import { manager, config } from "../..";
@@ -39,7 +40,7 @@ module.exports.run = {
           opt
             .setName("dest")
             .setDescription("Which channel?")
-            .addChannelType(0)
+            .addChannelTypes(ChannelType.GuildText)
             .setRequired(true)
         )
     )
