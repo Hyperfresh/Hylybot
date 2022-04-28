@@ -31,7 +31,6 @@ module.exports.run = {
           {name: "Nintendo Switch", value: "switch"},
           {name: "Fortnite", value: "fortnite"},
           {name: "Genshin Impact", value: "genshin"},
-          {name: "Nintendo Switch", value: "switch"},
           {name: "Minecraft", value: "mc"}
         )
     )
