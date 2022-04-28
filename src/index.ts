@@ -245,6 +245,13 @@ setInterval(async () => {
   await birthdayCheck(db, bot);
 }, 3600000);
 
+import streamCheck from "./loops/streamCheck";
+setInterval(async () => {
+  let mongod = await MongoClient.connect(url);
+  let db = mongod.db(dbName);
+  await streamCheck(db, bot);
+}, 60000)
+
 // import OzAlertFetch from "./loops/ozalert"
 // setInterval(async () => await OzAlertFetch(bot), 60000)
 
