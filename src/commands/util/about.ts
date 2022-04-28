@@ -99,10 +99,12 @@ module.exports.run = {
         .setName("what")
         .setDescription("What do you want to find out about?")
         .setRequired(true)
-        .addChoice("Discord Bot", "bot")
-        .addChoice("Server", "server")
-        .addChoice("Roles", "roles")
-        .addChoice("Profiles", "profiles")
+        .addChoices(
+          {name: "About Hylybot", value: "bot"},
+          {name: "About Hyla + Friends", value: "server"},
+          {name: "About server roles", value: "roles"},
+          {name: "About server profiles", value: "profiles"}
+        )
     ),
   async execute(interaction: Discord.CommandInteraction) {
     switch (interaction.options.getString("what")) {

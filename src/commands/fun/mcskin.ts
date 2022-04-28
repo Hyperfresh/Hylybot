@@ -23,13 +23,13 @@ module.exports.run = {
         .setDescription(
           "What part of the skin would you like to see? [Default: body]"
         )
-        .addChoices([
-          ["Avatar", "avatars"],
-          ["Head", "head"],
-          ["Body", "body"],
-          ["Bust", "bust"],
-          ["Skin", "skins"],
-        ])
+        .addChoices(
+          {name: "Avatar", value: "avatars"},
+          {name: "Head", value: "head"},
+          {name: "Body", value: "body"},
+          {name: "Bust", value: "bust"},
+          {name: "Skin", value: "skins"},
+        )
         .setRequired(false)
     ),
   async execute(interaction: CommandInteraction, db: Db) {
