@@ -210,7 +210,6 @@ manager.on("starboardNoEmptyMsg", (emoji, message, user) => {
 
 // Check if it's someone's birthday, and send a message at midday UTC time
 import birthdayCheck from "./loops/birthdayCheck";
-import { setTimeout } from "timers";
 setInterval(async () => {
   let mongod = await MongoClient.connect(url);
   let db = mongod.db(dbName);
