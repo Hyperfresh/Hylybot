@@ -500,6 +500,7 @@ module.exports.run = {
                     {name: "Genshin Impact", value: "genshin"},
                     {name: "Minecraft", value: "mc"}
                   )
+                  .setRequired(true)
               )
               .addStringOption((option) =>
                 option

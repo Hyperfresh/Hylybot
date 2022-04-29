@@ -17,7 +17,7 @@ import { Client } from "discord.js";
 
 export default async function ready(bot: Client, dev: boolean) {
   if (dev) {
-    bot.user.setActivity("⚠️ DEVELOPER MODE", { type: "PLAYING" });
+    bot.user.setActivity("⚠️ DEV MODE", { type: "PLAYING" });
     bot.user.setStatus("dnd");
     console.warn("Developer Mode is active!");
     return;

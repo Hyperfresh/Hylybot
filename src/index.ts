@@ -135,34 +135,6 @@ bot.on("shardReady", async () => {
     .then(() => {
       console.log("Pushed commands.")
     })
-    .then(() => {
-      console.log("Attempting to set permissions...")
-      setTimeout(async () => {
-        let guild = bot.guilds.cache.find((val) => val.id == config.GUILD_ID);
-        let commandos = guild.commands.fetch();
-        (await commandos).forEach((item) => {
-          console.log(`Setting permissions for command ${item.name}...`)
-          switch (item.name) {
-            case "purge":
-              item.setDefaultPermission(false)
-              item.permissions.set({permissions: [{id: config.MODROLE_ID, type: "ROLE", permission: true}]})
-              break
-            case "bot":
-              item.setDefaultPermission(false);
-              let perms = []
-              config.OWNER_ID.forEach((user) => {
-                perms.push({ id: user, type: "USER", permission: true })
-                console.log(
-                  `Added permission for user ${user} to bot command.`
-                );
-              });
-              item.permissions.set({permissions: perms})
-              break;
-            }
-          })
-      }, 3000)
-    })
-    .catch(console.error);
 });
 
 bot.on("interactionCreate", async (interaction) => {

@@ -6,20 +6,20 @@ module.exports.run = {
   data: new SlashCommandBuilder()
     .setName("tc")
     .setDescription("Convert between Celsius and Farenheit temperatures.")
+    .addNumberOption((option) =>
+      option
+        .setName("value")
+        .setDescription("The value you want to convert")
+        .setRequired(true)
+    )
     .addStringOption((option) =>
       option
         .setName("temp")
         .setDescription("What temperature unit are you converting from?")
         .addChoices(
-          {name: "Celsius", value: "C"},
-          {name: "Fahrenheit", value: "F"}
+          { name: "Celsius", value: "C" },
+          { name: "Fahrenheit", value: "F" }
         )
-        .setRequired(true)
-    )
-    .addNumberOption((option) =>
-      option
-        .setName("value")
-        .setDescription("The value you want to convert")
         .setRequired(true)
     ),
   async execute(interaction: CommandInteraction, db: Db) {
