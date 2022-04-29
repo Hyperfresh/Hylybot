@@ -1,0 +1,77 @@
+// Please place this file in the ./data/ folder after configuration.
+// This file is used to configure Hylybot.
+
+{    
+    /*
+    Developer Mode makes it so that it only responds to users in the OWNER_ID role.
+    Values: [true, false]. Default: false
+    */
+    "DEV_MODE": false,
+
+    /*
+    Here's a list of snowflakes (Discord IDs). They're pretty important. Here's what each one does:
+    - CLIENT_ID: This is a user snowflake. This is the User ID of the bot.
+    - GUILD_ID: This is a guild snowflake. This is the ID of the guild that Hylybot should be looking at.
+      Hylybot can only focus on one guild, as that's what its intended purpose is: a bot built for one specific server.
+    - ALERT_ID: This is a channel snowflake. This channel is where alerts retrieve via OzAlert are posted.
+    - BIRTH_ID: This is a role snowflake. This role is assigned to a user when it is their birthday.
+    - ANNOU_ID: This is a channel snowflake. This channel is the announcements channel of the server, and where birthday wishes are posted.
+    - OWNER_ID: This is an array of user snowflakes. These are the owners of the server, and also serve as the "superuser" of Hylybot.
+    */
+    "CLIENT_ID": "000111222333444555",
+    "GUILD_ID": "000111222333444555",
+    "ALERT_ID": "000111222333444555",
+    "BIRTH_ID": "000111222333444555",
+    "ANNOU_ID": "000111222333444555",
+    "OWNER_ID": ["000111222333444555", "000111222333444555"],
+    "MODLOG_ID": "000111222333444555",
+    "MODROLE_ID": "000111222333444555",
+
+    // Please paste your bot token below.
+    // DO NOT SHARE YOUR BOT TOKEN ONLINE.
+    "BOT_TOKEN": "bot.token.here",
+
+    // Below is the MongoDB connection URL to the Hylybot database.
+    // HYLYBOT WILL NOT WORK WITHOUT A PROPERLY SET UP MONGODB DATABASE.
+    // ISSUES WILL OCCUR AND DATA MAY BE LOST IF SET UP INCORRECTLY.
+    // DO NOT SHARE YOUR CONNECTION URL ONLINE.
+    "MONGO_URL": "mongodb://user:pass@server:27017",
+    "MONGO_DBNAME": "database",
+
+    // Below is the setup for currency conversion via https://OpenExchangeRates.org. You'll need to get an API key from there.
+    // The CC_OBJECT is the Object ID for the currency conversion data entry in MongoDB.
+    // DO NOT SHARE YOUR API KEY ONLINE.
+    "CC_API_KEY": "exchangeKeyHere",
+    "CC_OBJECT": "ObjectHere",
+
+    // The following is for a feature currently in development
+    // Below is the API key used to generate a map from Mapbox, as well as the Object IDs for alert data storage.
+    // These are used to generate map images for displaying alerts. You'll need to get your key from https://mapbox.com.
+    // DO NOT SHARE YOUR API KEY ONLINE.
+    "MAP_KEY": "map.token.here",
+    "RAT_OBJ": "",
+    "ALE_OBJ": "",
+
+    // Below is the key used to access worldwide weather from OpenWeatherMap. You'll need to get a key from https://openweathermap.org.
+    // DO NOT SHARE YOUR API KEY ONLINE.
+    "WEATHER_KEY": "weatherKeyHere",
+
+    // Below is the API key used to fetch GIFs from Tenor.
+    // DO NOT SHARE YOUR API KEY ONLINE.
+    "GIF_KEY": "tenorKeyHere",
+
+    // Below is the Client ID and Application Access Token used to fetch livestreams on Twitch.
+    // DO NOT SHARE YOUR ID OR TOKEN ONLINE.
+    "TWITCH_ID": "twitchClientHere",
+    "TWITCH_AT": "twitchAppHere",
+
+    // Hylybot checks linkage between Discord and Minecraft via the DiscordSRV plugin, and in-game nicknames set via Essentials.
+    // Please point MC_LIST to the "linkedaccounts.json" file in .../plugins/DiscordSRV.
+    // Please point MC_DATA to the "userdata" folder in .../plugins/Essentials.
+    "MC_LIST": "/Users/hyperfresh/Documents/GitHub/Hylybot/data/testing.json",
+    "MC_DATA": "/Users/hyperfresh/Documents/GitHub/Hylybot/data/userdata/",
+
+    // These are for testing purposes only, and has not been implemented.
+    "OZALERT_SA": ["http://127.0.0.1:5500/Test/CAP/CAP-SA-CFS-C.xml", "http://127.0.0.1:5500/Test/CAP/CAP-SA-MFS.xml"],
+    "RATINGS_SA": "http://127.0.0.1:5500/Test/Ratings/RATING-SA.xml"
+}
