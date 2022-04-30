@@ -69,8 +69,7 @@ module.exports.run = {
 
                 const content = lb.map(
                     (m, i) =>
-                        `**${i + 1}.**     ${m.stars} ⭐  -  ${m.embeds[0].description || `[Image](${m.embeds[0].image.url})`
-                        }`,
+                        `**${i + 1}.**     ${m.stars} ⭐  -  ${m.embeds[0].description || `[Image](${m.embeds[0].image.url})`}`,
                 );
                 if (!content) return interaction.reply({ content: "There's nothing on the starboard.", ephemeral: true });
                 const leaderboard = new MessageEmbed()
