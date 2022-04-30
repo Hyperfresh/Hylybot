@@ -2,13 +2,12 @@ import { SlashCommandBuilder } from "@discordjs/builders";
 import { CommandInteraction, MessageEmbed } from "discord.js";
 import { DateTime } from "luxon";
 import { Db, ObjectId } from "mongodb";
-
-import { config } from "../..";
+import Bot from "../../Bot";
 
 const fx = require("money");
 const oxr = require("open-exchange-rates");
-oxr.set({ app_id: config.CC_API_KEY });
-const object = new ObjectId(config.CC_OBJECT);
+oxr.set({ app_id: Bot.config.CC_API_KEY });
+const object = new ObjectId(Bot.config.CC_OBJECT);
 
 module.exports.run = {
     data: new SlashCommandBuilder()

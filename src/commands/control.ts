@@ -1,8 +1,8 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
 import { CommandInteraction } from "discord.js";
-import { config } from "..";
 import { Bash } from "node-bash";
 import { PowerShell } from "node-powershell";
+import Bot from "../Bot";
 
 async function looseJsonParse(obj) {
     let test;
@@ -108,7 +108,7 @@ module.exports.run = {
                 )
         ),
     async execute(interaction: CommandInteraction) {
-        if (!config.OWNER_ID.includes(interaction.user.id)) {
+        if (!Bot.config.OWNER_ID.includes(interaction.user.id)) {
             interaction.reply({
                 content: `Nice try, ${interaction.user.username}...`,
                 ephemeral: true,

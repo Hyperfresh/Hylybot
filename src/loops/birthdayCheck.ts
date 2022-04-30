@@ -2,8 +2,7 @@ import { Client, GuildMember, MessageEmbed } from "discord.js";
 import { Db } from "mongodb";
 
 import { DateTime } from "luxon";
-
-import { config } from "..";
+import Bot from "../Bot";
 
 export default async function birthdayCheck(db: Db, bot: Client) {
     let today = DateTime.now().setZone("utc");
@@ -11,12 +10,12 @@ export default async function birthdayCheck(db: Db, bot: Client) {
 
     if (hh == 0) {
         console.log("Checking birthdays...");
-        let guild = bot.guilds.cache.find((val) => val.id == config.GUILD_ID);
-        let oldMembers = guild.roles.fetch(config.BIRTH_ID);
+        let guild = bot.guilds.cache.find((val) => val.id == Bot.config.GUILD_ID);
+        let oldMembers = guild.roles.fetch(Bot.config.BIRTH_ID);
 
         (await oldMembers).members.forEach(async (user: GuildMember) => {
             try {
-                await user.roles.remove(config.BIRTH_ID);
+                await user.roles.remove(Bot.config.BIRTH_ID);
             } catch (e) {
                 console.error(e);
             }
@@ -34,7 +33,7 @@ export default async function birthdayCheck(db: Db, bot: Client) {
         if (data.length >= 1) {
             console.log(`Found ${data.length}:`, data);
             let channel: any = guild.channels.cache.find(
-                (val) => val.id == config.ANNOU_ID
+                (val) => val.id == Bot.config.ANNOU_ID
             );
 
             data.forEach(async (user) => {
@@ -43,7 +42,7 @@ export default async function birthdayCheck(db: Db, bot: Client) {
                 let nameArray = name.split(" ");
 
                 let userInfo = await guild.members.fetch(user.user);
-                userInfo.roles.add(config.BIRTH_ID);
+                userInfo.roles.add(Bot.config.BIRTH_ID);
                 const embed = new MessageEmbed();
                 embed.setTitle(`Happy birthday, ${name}! 🎉`);
                 embed.setDescription(`<@!${userInfo.id}> was born on ${todayString}.`);

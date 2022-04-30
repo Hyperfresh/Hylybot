@@ -3,10 +3,10 @@ import { Db } from "mongodb";
 import fs from "fs";
 
 import { load } from "js-yaml";
+import Bot from "../Bot";
 
-import { config } from "..";
-const userList = require(config.MC_LIST);
-const userData = config.MC_DATA;
+const userList = require(Bot.config.MC_LIST);
+const userData = Bot.config.MC_DATA;
 
 /**
  * Appends or deletes a Minecraft UUID to a user's server profile.

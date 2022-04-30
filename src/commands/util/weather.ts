@@ -4,8 +4,7 @@ import { CommandInteraction, MessageEmbed, User } from "discord.js";
 import { DateTime } from "luxon";
 import { Db, Document, WithId } from "mongodb";
 import fetch from "node-fetch";
-
-import { config } from "../..";
+import Bot from "../../Bot";
 
 let lastRun = DateTime.now();
 
@@ -40,7 +39,7 @@ async function returnWeatherEmbed(measure: string, location: string) {
     let alerts: Array<MessageEmbed> = [];
     let coords: Array<number> = [0, 0];
     await fetch(
-        `https://api.openweathermap.org/data/2.5/weather?q=${location}&appid=${config.WEATHER_KEY}&units=${measure}`
+        `https://api.openweathermap.org/data/2.5/weather?q=${location}&appid=${Bot.config.WEATHER_KEY}&units=${measure}`
     )
         .then((res) => res.json())
         .then((data: any) => {
@@ -95,7 +94,7 @@ async function returnWeatherEmbed(measure: string, location: string) {
                 .setDescription(String(err));
         });
     await fetch(
-        `https://api.openweathermap.org/data/2.5/onecall?lat=${coords[0]}&lon=${coords[1]}&exclude=current,minutely,hourly&units=${measure}&appid=${config.WEATHER_KEY}`
+        `https://api.openweathermap.org/data/2.5/onecall?lat=${coords[0]}&lon=${coords[1]}&exclude=current,minutely,hourly&units=${measure}&appid=${Bot.config.WEATHER_KEY}`
     )
         .then((res) => res.json())
         .then((data) => {

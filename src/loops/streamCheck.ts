@@ -1,14 +1,14 @@
 import { Client, MessageEmbed } from "discord.js";
 import { Db } from "mongodb";
 import fetch from "node-fetch";
-import { config } from "..";
+import Bot from "../Bot";
 
 let working = true;
 
 export default async function streamCheck(db: Db, bot: Client) {
     if (!working) return;
 
-    let guild = bot.guilds.cache.find((val) => val.id == config.GUILD_ID);
+    let guild = bot.guilds.cache.find((val) => val.id == Bot.config.GUILD_ID);
     // First get array
     let streamers = await db.collection("streams").find({ type: "twitch" }).project({ channel: 1 }).toArray();
     let streamsList: Array<string> = [];
@@ -19,8 +19,8 @@ export default async function streamCheck(db: Db, bot: Client) {
         `https://api.twitch.tv/helix/streams/?user_login=${streamsList.join("&user_login=")}`, {
         method: "GET",
         headers: {
-            "Authorization": `Bearer ${config.TWITCH_AT}`,
-            "Client-Id": config.TWITCH_ID
+            "Authorization": `Bearer ${Bot.config.TWITCH_AT}`,
+            "Client-Id": Bot.config.TWITCH_ID
         }
     }).then(res => res.json())
         .then(res => {
@@ -36,9 +36,9 @@ export default async function streamCheck(db: Db, bot: Client) {
                     .setFooter({ text: "Twitch stream checking will be disabled until I have been restarted." });
 
                 let channel: any = guild.channels.cache.find(
-                    (val) => val.id == config.MODLOG_ID
+                    (val) => val.id == Bot.config.MODLOG_ID
                 );
-                return channel.send({ content: `<@&${config.MODROLE_ID}>`, embeds: [embed] });
+                return channel.send({ content: `<@&${Bot.config.MODROLE_ID}>`, embeds: [embed] });
             }
 
             res.data.forEach(async item => {

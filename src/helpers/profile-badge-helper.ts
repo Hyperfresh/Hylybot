@@ -1,6 +1,5 @@
 import { Client, User, GuildMember, Guild } from "discord.js";
-
-import { config } from "..";
+import Bot from "../Bot";
 
 /**
  * A helper library for building server profiles.
@@ -88,7 +87,7 @@ export async function createServerBadges(
     let guildMember: GuildMember = await guild.members.fetch(user);
     let roles = guildMember.roles.cache;
 
-    if (config.OWNER_ID.includes(user_id)) r.push("crown", "tools");
+    if (Bot.config.OWNER_ID.includes(user_id)) r.push("crown", "tools");
     // Owner
     else if (roles.has("908691786669654047")) r.push("zap");
     // Admin

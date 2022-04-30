@@ -2,7 +2,8 @@ import { SlashCommandBuilder } from "@discordjs/builders";
 import { ChannelType } from "discord-api-types/v10";
 import { CommandInteraction, MessageEmbed } from "discord.js";
 import { Db } from "mongodb";
-import { manager, config } from "../..";
+import { manager } from "../..";
+import Bot from "../../Bot";
 
 module.exports.run = {
     data: new SlashCommandBuilder()
@@ -87,7 +88,7 @@ module.exports.run = {
                 break;
             case "channel":
                 await interaction.deferReply({ ephemeral: true });
-                if (!config.OWNER_ID.includes(interaction.user.id))
+                if (!Bot.config.OWNER_ID.includes(interaction.user.id))
                     return interaction.editReply(
                         "You are not permitted to run this command."
                     );
