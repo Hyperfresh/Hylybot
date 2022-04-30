@@ -67,7 +67,7 @@ export default new class Bot extends Client {
                 body: this.commandsToPush,
             })
             .then(() => {
-                console.log("Pushed commands.");
+                console.log("info: pushed commands");
             });
     }
 
