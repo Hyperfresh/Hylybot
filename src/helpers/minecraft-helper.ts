@@ -1,6 +1,6 @@
 import minecraftPlayer = require("minecraft-player");
 import { Db } from "mongodb";
-import * as fs from "fs";
+import fs from "fs";
 
 import { load } from "js-yaml";
 
@@ -14,23 +14,23 @@ const userData = config.MC_DATA;
  * @param user: User ID.
  */
 export async function updateMinecraft(db: Db, user: string) {
-  let value = userList[user];
-  if (!value) {
-    let result = await db.collection("profiles").findOne({ user: user });
-    if (result.gametags.mc == null) {
-      await db
-        .collection("profiles")
-        .updateOne({ user: user }, { $set: { "gametags.mc": null } });
+    let value = userList[user];
+    if (!value) {
+        let result = await db.collection("profiles").findOne({ user: user });
+        if (result.gametags.mc == null) {
+            await db
+                .collection("profiles")
+                .updateOne({ user: user }, { $set: { "gametags.mc": null } });
+        }
+        return -1;
     }
-    return -1;
-  }
 
-  let mcUser = await minecraftPlayer(value);
+    let mcUser = await minecraftPlayer(value);
 
-  await db
-    .collection("profiles")
-    .updateOne({ user: user }, { $set: { "gametags.mc": mcUser.uuid } });
-  return 0;
+    await db
+        .collection("profiles")
+        .updateOne({ user: user }, { $set: { "gametags.mc": mcUser.uuid } });
+    return 0;
 }
 
 /**
@@ -39,18 +39,18 @@ export async function updateMinecraft(db: Db, user: string) {
  * @param hide_nick - [Optional] Hide nickname in returned result.
  */
 export async function parseMinecraft(uuid: string, hide_nick?: boolean): Promise<string> {
-  let mcUser = await minecraftPlayer(uuid);
-  let username = mcUser.username;
-  try {
-    if (hide_nick) throw new Error
-    let document: any = load(
-      fs.readFileSync(`${userData}/${uuid}.yml`, "utf8")
-    );
-    if (!document.nickname) throw new Error();
-    let value = document.nickname;
-    let nickname = value.replace(/(§(\d|[xa-f]))/gi, "");
-    return `${username} (\`*${nickname}\`)`;
-  } catch {
-    return username;
-  }
+    let mcUser = await minecraftPlayer(uuid);
+    let username = mcUser.username;
+    try {
+        if (hide_nick) throw new Error;
+        let document: any = load(
+            fs.readFileSync(`${userData}/${uuid}.yml`, "utf8")
+        );
+        if (!document.nickname) throw new Error();
+        let value = document.nickname;
+        let nickname = value.replace(/(§(\d|[xa-f]))/gi, "");
+        return `${username} (\`*${nickname}\`)`;
+    } catch {
+        return username;
+    }
 }
