@@ -30,26 +30,18 @@ export default new class Bot extends Client {
         this.config = jsonc.parse(configData);
         console.log('info: config loaded');
 
-        fs.readdir("./build/commands/", { withFileTypes: true }, (error, f) => {
+        fs.readdir("./build/commands/", { withFileTypes: true }, (error, files) => {
             if (error) return console.error(error);
-            f.forEach((f) => {
-                if (f.isDirectory()) {
-                    fs.readdir(`./build/commands/${f.name}/`, (error, fi) => {
-                        if (error) return console.error(error);
-                        fi.forEach((fi) => {
-                            if (!fi.endsWith(".js")) return;
-                            let commande = require(`./commands/${f.name}/${fi}`);
-                            this.commands.set(commande.help.name, commande);
-                            this.commandsToPush.push(commande.run.data.toJSON());
-                            console.log(`Loaded ${f.name}/${fi}.`);
+            files.forEach((file) => {
+                if (file.isDirectory()) {
+                    fs.readdir(`./build/commands/${file.name}/`, (cmdError, files2) => {
+                        if (cmdError) return console.error(cmdError);
+                        files2.forEach((filee) => {
+                            this.importCommand(`${file.name}/${filee}`);
                         });
                     });
                 } else {
-                    if (!f.name.endsWith(".js")) return;
-                    let commande = require(`./commands/${f.name}`);
-                    this.commands.set(commande.help.name, commande);
-                    this.commandsToPush.push(commande.run.data.toJSON());
-                    console.log(`Loaded ${f.name}.`);
+                    this.importCommand(file.name);
                 }
             });
         });
@@ -58,6 +50,14 @@ export default new class Bot extends Client {
         let mongod = await MongoClient.connect(this.config.MONGO_URL);
         this.db = mongod.db(this.config.MONGO_DBNAME);
         console.log('info: database connected');
+    }
+
+    private async importCommand(file: string) {
+        if (!file.endsWith(".js")) return;
+        let commande = require(`./commands/${file}`);
+        this.commands.set(commande.help.name, commande);
+        this.commandsToPush.push(commande.run.data.toJSON());
+        console.log(`Loaded ${file}.`);
     }
 
     public async pushCommands() {
