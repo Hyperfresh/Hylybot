@@ -23,7 +23,7 @@ export default async function streamCheck(db: Db, bot: Client) {
                 "Client-Id": config.TWITCH_ID
             }
         }).then(res => res.json())
-        .then(res => {
+        .then(async res => {
             if (res.error) {
                 working = false
 
@@ -41,17 +41,19 @@ export default async function streamCheck(db: Db, bot: Client) {
                 return channel.send({content: `<@&${config.MODROLE_ID}>`, embeds: [embed]})
             }
 
-            res.data.forEach(async item => {
-                let stream = await db.collection('streams').findOne({"channel": item.user_login})
-                if (stream && !stream.live) {
-                    await db.collection("streams").updateOne({"channel": item.user_login}, {$set: {live: true}})
+            let streams = await db.collection("streams").find({$not: {type: "youtube"}}).toArray()
+            streams.forEach(async stream => {
+                if (res.data.includes(stream.channel)) {
+                    await db.collection("streams").updateOne(stream, {$set: {live: true}})
                     let notify = stream.notify ? `<@&${stream.notify}>,` : ""
                     let channel: any = guild.channels.cache.find(
                         (val) => val.id == stream.announce
                     );
-                    channel.send(`${notify} **${item.user_name}** is 🔴 LIVE with ${item.game_name}: "${item.title}"\n\nhttps://twitch.tv/${item.user_login}`)
+                    let item = res.data.filter(stream => stream.user_login == stream.channel)
+                    channel.send(`${notify} __**${item.user_name}**__ is 🔴 LIVE with **${item.game_name}**: "${item.title}"\n\nhttps://twitch.tv/${item.user_login}`)
+                } else {
+                    await db.collection("streams").updateOne(stream, {$set: {live: false}})
                 }
-                else if (!stream) await db.collection("streams").updateOne({"channel": item.user_login}, {$set: {live: false}})
             })
         })
 }
