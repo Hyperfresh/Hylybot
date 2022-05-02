@@ -5,8 +5,8 @@ import fs from "fs";
 import { load } from "js-yaml";
 import Bot from "../Bot";
 
-const userList = require(Bot.config.MC_LIST);
-const userData = Bot.config.MC_DATA;
+const userList = Bot.config.MC_LIST ? require(Bot.config.MC_LIST) : null;
+const userData = Bot.config.MC_DATA || null;
 
 /**
  * Appends or deletes a Minecraft UUID to a user's server profile.

@@ -7,7 +7,7 @@ import Bot from "../../Bot";
 const fx = require("money");
 const oxr = require("open-exchange-rates");
 oxr.set({ app_id: Bot.config.CC_API_KEY });
-const object = new ObjectId(Bot.config.CC_OBJECT);
+const object = Bot.config.CC_OBJECT ? new ObjectId(Bot.config.CC_OBJECT) : null;
 
 module.exports.run = {
     data: new SlashCommandBuilder()
