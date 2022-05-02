@@ -51,7 +51,7 @@ export default async function streamCheck(db: Db, bot: Client) {
                     );
                     channel.send(`${notify} **${item.user_name}** is 🔴 LIVE with ${item.game_name}: "${item.title}"\n\nhttps://twitch.tv/${item.user_login}`);
                 }
-                else await db.collection("streams").updateOne({ "channel": item.user_login }, { $set: { live: false } });
-            });
-        });
+                else if (!stream) await db.collection("streams").updateOne({"channel": item.user_login}, {$set: {live: false}})
+            })
+        })
 }
