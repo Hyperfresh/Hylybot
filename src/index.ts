@@ -1,3 +1,5 @@
+import Bot from './Bot';
+
 var copy = String(`
 Hylybot - the custom-built Discord bot for the Hyla + Friends server.
 Copyright (C) 2021 Hyla A | https://github.com/Hyperfresh/Hylybot
@@ -24,33 +26,7 @@ if (!/^(v([1-9][6-9]+\.)?(\d+\.)?(\d+))$/.test(process.version)) {
     );
 }
 
-import Bot from './Bot';
 
-// Set up Starboard.
-import { Starboard, StarboardDefaultCreateOptions } from "discord-starboards";
-const StarboardManager: any = require("discord-starboards");
-const StarboardsManagerCustomDb: any = class extends StarboardManager {
-    public async getAllStarboards(): Promise<any> {
-        console.log("Grabbing starboard database...");
-        const db = Bot.db;
-        return db.collection("starboard").find().toArray();
-    }
-    public async saveStarboard(data: Starboard): Promise<boolean | void> {
-        (await this.getDb()).collection("starboard").insertOne(data);
-        return true;
-    }
-    public async deleteStarboard(channelId: string, emoji: string): Promise<boolean | void> {
-        const db = Bot.db.collection("starboard");
-        db.findOneAndDelete((starboard: Starboard) => (starboard.channelId === channelId && starboard.options.emoji === emoji));
-        return true;
-    }
-    public async editStarboard(channelId: string, emoji: string, data: Partial<StarboardDefaultCreateOptions>): Promise<boolean | void> {
-        const db = Bot.db.collection("starboard");
-        db.findOneAndUpdate((starboard: Starboard) => (starboard.channelId === channelId && starboard.options.emoji === emoji), data);
-    }
-};
-const manager = new StarboardsManagerCustomDb(Bot, { storage: false, ignoredChannels: [] });
-export { manager };
 
 /**
  * Retrieve a configuration value stored on Hylybot's MongoDB database.
@@ -118,10 +94,6 @@ Bot.on("interactionCreate", async (interaction) => {
     }
 });
 
-manager.on("starboardNoEmptyMsg", (emoji, message, user) => {
-    message.channel.send(`<@${user.id}>, this message seems to have no content. What's the point in starring that?`);
-});
-
 // manager.on("starboardReactionAdd", async (emoji, message, user) => {
 //   let locked: boolean = await getDbConfig("starboardLock")
 
@@ -143,9 +115,8 @@ setInterval(async () => {
 
 // import OzAlertFetch from "./loops/ozalert"
 // setInterval(async () => await OzAlertFetch(bot), 60000)
-
 import fs from 'fs';
 import { jsonc } from 'jsonc';
 let configData = fs.readFileSync("./data/config.jsonc", "utf8");
 let config = jsonc.parse(configData);
-Bot.login(config.BOT_TOKEN);
+Bot.start(config.BOT_TOKEN);

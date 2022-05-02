@@ -2,7 +2,6 @@ import { SlashCommandBuilder } from "@discordjs/builders";
 import { ChannelType } from "discord-api-types/v10";
 import { CommandInteraction, MessageEmbed } from "discord.js";
 import { Db } from "mongodb";
-import { manager } from "../..";
 import Bot from "../../Bot";
 
 module.exports.run = {
@@ -60,7 +59,7 @@ module.exports.run = {
         let command = interaction.options.getSubcommand();
         switch (command) {
             case "stats":
-                const starboard = manager.starboards.find(
+                const starboard = Bot.starboardManager.starboards.find(
                     (s) => s.guildId === interaction.guild.id && s.options.emoji === "⭐",
                 );
                 if (!starboard) return interaction.reply({ content: "Seems I'm unable to retrieve the starboard at the moment.", ephemeral: true });
@@ -93,7 +92,7 @@ module.exports.run = {
                     );
                 let cn: any = interaction.options.getChannel("dest");
                 try {
-                    manager.create(cn);
+                    Bot.starboardManager.create(cn);
                     interaction.editReply(`Channel set to <#${cn.id}>.`);
                 } catch (err) {
                     console.error(err.stack);

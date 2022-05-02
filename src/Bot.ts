@@ -5,13 +5,37 @@ import { jsonc } from "jsonc";
 import ready from "./events/ready";
 import { REST } from "@discordjs/rest";
 import { Routes } from "discord-api-types/v9";
+import { Starboard, StarboardDefaultCreateOptions } from "discord-starboards";
+import StarboardManager from "discord-starboards";
 
 export default new class Bot extends Client {
     public config: any;
     public db: Db;
+    private static db: Db;
 
     public commands: Collection<any, any> = new Collection();
     private commandsToPush: any[] = [];
+
+    private StarboardsManagerCustomDb = class extends StarboardManager {
+        public async getAllStarboards(): Promise<any> {
+            console.log("Grabbing starboard database...");
+            return Bot.db.collection("starboard").find().toArray();
+        }
+        public async saveStarboard(data: Starboard): Promise<boolean | void> {
+            await Bot.db.collection("starboard").insertOne(data);
+            return true;
+        }
+        public async deleteStarboard(channelId: string, emoji: string): Promise<boolean | void> {
+            const db = Bot.db.collection("starboard");
+            db.findOneAndDelete((starboard: Starboard) => (starboard.channelId === channelId && starboard.options.emoji === emoji));
+            return true;
+        }
+        public async editStarboard(channelId: string, emoji: string, data: Partial<StarboardDefaultCreateOptions>): Promise<boolean | void> {
+            const db = Bot.db.collection("starboard");
+            db.findOneAndUpdate((starboard: Starboard) => (starboard.channelId === channelId && starboard.options.emoji === emoji), data);
+        }
+    };
+    public starboardManager: any;
 
     public constructor() {
         super({
@@ -49,7 +73,15 @@ export default new class Bot extends Client {
 
         let mongod = await MongoClient.connect(this.config.MONGO_URL);
         this.db = mongod.db(this.config.MONGO_DBNAME);
+        Bot.db = this.db;
         console.log('info: database connected');
+
+        this.starboardManager = new this.StarboardsManagerCustomDb(this, { storage: false });
+        console.log('info: starboard initialized');
+
+        this.starboardManager.on("starboardNoEmptyMsg", (emoji, message, user) => {
+            message.channel.send(`<@${user.id}>, this message seems to have no content. What's the point in starring that?`);
+        });
     }
 
     private async importCommand(file: string) {
