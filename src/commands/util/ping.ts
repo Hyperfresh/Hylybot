@@ -28,8 +28,9 @@ module.exports.run = {
             });
         } else {
             await interaction.reply(
-                `> **Pong!**\n🏓 **Latency**: ${Date.now() - interaction.createdTimestamp
-                }ms\n🔌 **Socket**: ${Math.ceil(interaction.client.ws.ping)}ms`
+                `> **Pong!**\n
+                🏓 **Latency**: ${Date.now() - interaction.createdTimestamp}ms\n
+                🔌 **Socket**: ${Math.ceil(interaction.client.ws.ping)}ms`
             );
         }
     },

@@ -66,19 +66,17 @@ async function returnWeatherEmbed(measure: string, location: string) {
                 .setAuthor({ name: `${data.name}, ${data.sys.country}` })
                 .setTitle(titleCase(data.weather[0].description))
                 .setDescription(
-                    `> **Currently, it's ${data.main.temp.toFixed(
-                        0
-                    )}${temp}**. (Feels like ${data.main.feels_like.toFixed(
-                        0
-                    )}${temp} | <:high:931085546338545684> ${data.main.temp_max.toFixed(
-                        0
-                    )}${temp} | <:low:931085579939106826> ${data.main.temp_min.toFixed(
-                        0
-                    )}${temp})\n♨ **Humidity**: ${data.main.humidity
-                    }%\n☁️ **Cloud cover**: ${data.clouds.all
-                    }%\n💨 **Wind**: ${windSpeed} winds @ ${data.wind.deg
-                    }° (${windGust} gusts)\n🌧 **Rain**: ${rain} recorded over the past 3 hours\n**Sunrise & sunset**: 🔺 <t:${data.sys.sunrise
-                    }:t> 🔻 <t:${data.sys.sunset}:t>`
+                    `> **Currently, it's ${data.main.temp.toFixed(0)}${temp}**.
+                    (Feels like ${data.main.feels_like.toFixed(0)}${temp} |
+                    <:high:931085546338545684> ${data.main.temp_max.toFixed(0)}${temp} | 
+                    <:low:931085579939106826> ${data.main.temp_min.toFixed(0)}${temp})\n
+                    ♨ **Humidity**: ${data.main.humidity}%\n
+                    ☁️ **Cloud cover**: ${data.clouds.all}%\n
+                    💨 **Wind**: ${windSpeed} winds @ ${data.wind.deg}°
+                    (${windGust} gusts)\n
+                    🌧 **Rain**: ${rain} recorded over the past 3 hours\n
+                    **Sunrise & sunset**: 🔺 <t:${data.sys.sunrise}:t>
+                    🔻 <t:${data.sys.sunset}:t>`
                 )
                 .setThumbnail(
                     `http://openweathermap.org/img/wn/${data.weather[0].icon}@2x.png`
