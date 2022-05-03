@@ -5,8 +5,7 @@ import { jsonc } from "jsonc";
 import ready from "./events/ready";
 import { REST } from "@discordjs/rest";
 import { Routes } from "discord-api-types/v9";
-import { Starboard, StarboardDefaultCreateOptions } from "discord-starboards";
-import StarboardManager from "discord-starboards";
+import StarboardManager, { Starboard, StarboardDefaultCreateOptions } from "discord-starboards";
 
 export default new class Bot extends Client {
     public config: any;
