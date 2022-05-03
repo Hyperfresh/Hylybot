@@ -41,9 +41,9 @@ function killMessage(user: User, target: User): string {
         `<@!${user.id}> just got <@!${target.id}> luigi'd and couldn't handle Luigi's presence`, // Submitted by David R
         `<@!${user.id}> convinced <@!${target.id}> to go down a sewer slide.`, // Submitted by Hyla A
         `<@!${user.id}> hurled <@!${target.id}> into the sun` // Submitted by David R
-    ]
-    let item = Math.random() * (messages.length - 1)
-    return messages[item.toFixed(0)]
+    ];
+    let item = Math.random() * (messages.length - 1);
+    return messages[item.toFixed(0)];
 }
 
 module.exports.run = {
@@ -52,14 +52,14 @@ module.exports.run = {
         .setDescription("Commit a murder.")
         .addUserOption(opt => opt.setName("who").setDescription("Who do you want to murder?").setRequired(true)),
     async execute(interaction: CommandInteraction) {
-        let user = interaction.user
-        let targ = interaction.options.getUser("who")
-        interaction.reply(killMessage(user, targ))
+        let user = interaction.user;
+        let targ = interaction.options.getUser("who");
+        interaction.reply(killMessage(user, targ));
     }
-}
+};
 
 module.exports.help = {
     name: "kill",
     usage: "/kill <user>",
     desc: "Murder.",
-  };
+};
