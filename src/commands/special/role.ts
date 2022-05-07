@@ -8,7 +8,7 @@ import {
     MessageButton,
     MessageEmbed,
 } from "discord.js";
-import isImageURL from "image-url-validator";
+const isImageURL = require("image-url-validator").default;
 import { Db } from "mongodb";
 
 import fetch from "node-fetch";
@@ -92,11 +92,25 @@ async function customIcon(
     return guild.roles
         .fetch(role.id)
         .then((e) => {
-            e.setIcon(role_icon);
-            return new MessageEmbed()
+            return e.setIcon(role_icon)
+            .then(() => {
+                return new MessageEmbed()
                 .setTitle("Role icon updated.")
                 .setThumbnail(icon)
                 .setColor("GREEN");
+            })
+            .catch(err => {
+                return new MessageEmbed()
+                .setTitle("An error occurred.")
+                .setDescription(
+                    `Attempted to set icon \`${icon}\`. Got error \`${err}\`.`
+                )
+                .setFooter({
+                    text: "If this error is not due to server boosting, please report it to the bot developer.",
+                })
+                .setColor("RED");
+            });
+            
         })
         .catch((err) => {
             return new MessageEmbed()

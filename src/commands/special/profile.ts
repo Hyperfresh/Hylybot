@@ -16,7 +16,7 @@ import { SlashCommandBuilder } from "@discordjs/builders";
 import { DateTime } from "luxon";
 import timezone from "moment-timezone";
 
-import isImageURL from "image-url-validator";
+const isImageURL = require("image-url-validator").default;
 
 import * as badgeHelper from "../../helpers/profile-badge-helper";
 import * as buttonHelper from "../../helpers/profile-button-helper";

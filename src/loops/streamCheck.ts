@@ -41,7 +41,7 @@ export default async function streamCheck(db: Db, bot: Client) {
                 return channel.send({ content: `<@&${Bot.config.MODROLE_ID}>`, embeds: [embed] });
             }
 
-            let streams = await db.collection("streams").find({$not: {type: "youtube"}}).toArray()
+            let streams = await db.collection("streams").find({ type: { $not: { $gt: "youtube" } } }).toArray()
             streams.forEach(async stream => {
                 if (res.data.includes(stream.channel)) {
                     await db.collection("streams").updateOne(stream, {$set: {live: true}})
