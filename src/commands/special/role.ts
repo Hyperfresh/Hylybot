@@ -60,10 +60,12 @@ async function customIcon(
     if (!(guild.premiumTier == "TIER_2" || guild.premiumTier == "TIER_3"))
         return new MessageEmbed()
             .setTitle(
-                "Oh no! The server's Boost Level isn't high enough to add your role icon!"
+                "Oh no!"
             )
             .setDescription(
-                `Role icons require Boost Level \`TIER_2\` or higher. This server's current Boost Level is \`${guild.premiumTier}\`.`
+                `**The server's Boost Level isn't high enough to add your role icon!**\n
+                Role icons require Boost Level \`TIER_2\` or higher.\n
+                This server's current Boost Level is \`${guild.premiumTier}\`.`
             )
             .setFooter({
                 text: "We don't usually beg for server boosts. However, if you want role icons unlocked, you should probably start begging!",
