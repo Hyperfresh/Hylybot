@@ -44,7 +44,7 @@
     "open-exchange-rates": "^0.3.0",
     "ping": "^0.4.2",
     "sharp": "^0.30.6",
-    "typescript": "^4.6.4",
+    "typescript": "^4.7.2",
     "xml2js": "^0.4.23"
   }
 }
