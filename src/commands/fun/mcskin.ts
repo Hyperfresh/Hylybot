@@ -35,10 +35,10 @@ module.exports.run = {
     async execute(interaction: CommandInteraction, db: Db) {
         await interaction.deferReply();
         let user: User = interaction.options.getUser("who")
-            ? interaction.options.getUser("who")
+            ? interaction.options.getUser("who", true)
             : interaction.user;
         let skin: string = interaction.options.getString("type")
-            ? interaction.options.getString("type")
+            ? interaction.options.getString("type", true)
             : "body";
 
         let res: any = await db.collection("profiles").findOne({ user: user.id });

@@ -5,6 +5,7 @@
       "outDir": "build",
       "sourceMap": true,
       "esModuleInterop": true,
-      "removeComments": true
+      "removeComments": true,
+      "strict": true
     }
 }

@@ -17,8 +17,8 @@ module.exports.run = {
         .setName("break")
         .setDescription("I'm looking at you, Octolili."),
     async execute(interaction: CommandInteraction) {
-        let item = Math.random() * (breakMessages.length - 1);
-        interaction.reply(`${breakMessages[item.toFixed(0)]}`);
+        let item: number = Math.round((Math.random() * (breakMessages.length - 1)));
+        interaction.reply(`${breakMessages[item]}`);
     },
 };
 
