@@ -1,7 +1,6 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
 import { ChannelType } from "discord-api-types/v10";
 import { CommandInteraction, MessageEmbed } from "discord.js";
-import { Db } from "mongodb";
 import Bot from "../../Bot";
 
 module.exports.run = {
@@ -55,24 +54,24 @@ module.exports.run = {
                         .setRequired(true)
                 )
         ),
-    async execute(interaction: CommandInteraction, db: Db) {
+    async execute(interaction: CommandInteraction) {
         let command = interaction.options.getSubcommand();
         switch (command) {
             case "stats":
                 const starboard = Bot.starboardManager.starboards.find(
-                    (s) => s.guildId === interaction.guild.id && s.options.emoji === "⭐",
+                    (s: any) => s.guildId === interaction.guild?.id && s.options.emoji === "⭐",
                 );
                 if (!starboard) return interaction.reply({ content: "Seems I'm unable to retrieve the starboard at the moment.", ephemeral: true });
 
                 const lb = await starboard.leaderboard();
 
                 const content = lb.map(
-                    (m, i) =>
+                    (m: any, i: any) =>
                         `**${i + 1}.**     ${m.stars} ⭐  -  ${m.embeds[0].description || `[Image](${m.embeds[0].image.url})`}`,
                 );
                 if (!content) return interaction.reply({ content: "There's nothing on the starboard.", ephemeral: true });
                 const leaderboard = new MessageEmbed()
-                    .setTitle(`${interaction.guild.name} Starboard`)
+                    .setTitle(`${interaction.guild?.name} Starboard`)
                     .setDescription(content.join("\n"))
                     .setFooter({ text: "Only shows the top 10 of the 100 most recent stars." });
                 interaction.reply({ embeds: [leaderboard] });
@@ -94,7 +93,7 @@ module.exports.run = {
                 try {
                     Bot.starboardManager.create(cn);
                     interaction.editReply(`Channel set to <#${cn.id}>.`);
-                } catch (err) {
+                } catch (err: any) {
                     console.error(err.stack);
                     interaction.editReply(`An error occurred. ${err.message}`);
                 }

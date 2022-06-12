@@ -1,7 +1,5 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
 import { CommandInteraction } from "discord.js";
-import { Db } from "mongodb";
-
 module.exports.run = {
     data: new SlashCommandBuilder()
         .setName("tc")
@@ -22,8 +20,8 @@ module.exports.run = {
                 )
                 .setRequired(true)
         ),
-    async execute(interaction: CommandInteraction, db: Db) {
-        let temp = interaction.options.getNumber("value");
+    async execute(interaction: CommandInteraction) {
+        let temp = interaction.options.getNumber("value", true);
         if (interaction.options.getString("temp") == "C") {
             await interaction.reply(`${(temp * 1.8 + 32).toFixed(2)}℉`);
         } else {

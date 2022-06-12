@@ -93,7 +93,7 @@ async function customIcon(
 
     return guild.roles
         .fetch(role.id)
-        .then((e) => {
+        .then((e: any) => {
             return e.setIcon(role_icon)
             .then(() => {
                 return new MessageEmbed()
@@ -101,7 +101,7 @@ async function customIcon(
                 .setThumbnail(icon)
                 .setColor("GREEN");
             })
-            .catch(err => {
+            .catch((err: any) => {
                 return new MessageEmbed()
                 .setTitle("An error occurred.")
                 .setDescription(
@@ -188,7 +188,7 @@ module.exports.run = {
         if (interaction.isButton()) {
             await interaction.deferUpdate();
             if (interaction.customId == "preCol") {
-                let response = [];
+                let response: Array<any> = [];
                 colours.forEach((item) => {
                     response.push(` ${item.name}`);
                 });
@@ -197,7 +197,7 @@ module.exports.run = {
                 );
             } else {
                 // assume re-assign
-                let reassign = await db
+                let reassign: any = await db
                     .collection("roles")
                     .findOne({ user: interaction.user.id });
                 await interaction.member.roles.add(reassign.role);
@@ -208,9 +208,9 @@ module.exports.run = {
             return;
         }
         await interaction.deferReply({ ephemeral: true });
-        let rolecolour;
+        let rolecolour: any;
         let __FOUND;
-        let search = await db
+        let search: any = await db
             .collection("roles")
             .findOne({ user: interaction.user.id });
         switch (interaction.options.getSubcommand()) {
@@ -256,7 +256,7 @@ module.exports.run = {
                         hoist: false,
                         position: 32,
                     })
-                    .then(async (role) => {
+                    .then(async (role: any) => {
                         const data = {
                             user: String(interaction.user.id),
                             role: String(role.id),
@@ -286,7 +286,7 @@ module.exports.run = {
                         // Edit role name
                         interaction.guild.roles
                             .fetch(search.role)
-                            .then((role) => {
+                            .then((role: any) => {
                                 role.edit({ name: interaction.options.getString("value") });
                                 interaction.editReply(
                                     `Your custom role's name was edited: <@&${role.id}>`
@@ -321,7 +321,7 @@ module.exports.run = {
                         }
                         interaction.guild.roles
                             .fetch(search.role)
-                            .then((role) => {
+                            .then((role: any) => {
                                 role.edit({ color: rolecolour });
                                 interaction.editReply(
                                     `Your custom role's colour was edited: <@&${role.id}>`

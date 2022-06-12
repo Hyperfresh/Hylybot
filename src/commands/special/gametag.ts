@@ -78,7 +78,7 @@ module.exports.run = {
                 );
                 break;
             case "mc":
-                let minecraft: string;
+                let minecraft: string = "";
                 if (!result.gametags.mc) {
                     let res = await updateMinecraft(db, result.user);
                     if (res == -1) minecraft = "Unknown";

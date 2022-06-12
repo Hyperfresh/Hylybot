@@ -4,11 +4,9 @@ import {
     Client,
     MessageButton,
     MessageActionRow,
-    Guild,
     CommandInteraction,
     User,
     ButtonInteraction,
-    GuildMember,
 } from "discord.js";
 
 import { SlashCommandBuilder } from "@discordjs/builders";
@@ -41,7 +39,7 @@ export async function createEmbed(
     client: Client,
     r: any,
     user: User,
-    guild: Guild
+    guild: any
 ): Promise<MessageEmbed> {
     let time = DateTime.now()
         .setZone(r.timezone)
@@ -87,7 +85,7 @@ export async function createEmbed(
         );
     if (r.bio !== null) embed.addField(r.bio.title, r.bio.desc, false);
 
-    let minecraft: string;
+    let minecraft: string = "";
     if (!r.gametags.mc) {
         let res = await updateMinecraft(db, r.user);
         if (res == -1) minecraft = "Unknown";
@@ -109,7 +107,7 @@ export async function createEmbed(
         let FN = r.gametags.fortnite
             ? `**Fortnite username**: ${r.gametags.fortnite}\n`
             : "";
-        let MC = (result) => {
+        let MC = (result: any) => {
             if (!result)
                 return "*Run the `view` command again to see Minecraft username*";
             else if (result == "Unknown") return "";
@@ -669,7 +667,7 @@ module.exports.run = {
                         db,
                         interaction.client,
                         result,
-                        interaction.client.users.cache.get(result.user),
+                        await interaction.client.users.fetch(result.user),
                         interaction.guild
                     );
                     await interaction.editReply({
@@ -699,7 +697,7 @@ module.exports.run = {
                     });
                     return;
                 }
-                let value;
+                let value: any
                 switch (interaction.options.getSubcommand()) {
                     case "avatar":
                         value = interaction.options.getString("url");
@@ -998,8 +996,8 @@ module.exports.run = {
                             .then(async () => {
                                 let assign: Array<string> = [];
 
-                                let guildMember: GuildMember =
-                                    await interaction.guild.members.fetch(interaction.user);
+                                let guildMember: any =
+                                    await interaction.guild?.members.fetch(interaction.user);
                                 let roles = guildMember.roles.cache;
 
                                 if (roles.has("908680453240791048")) assign.push("he/him");

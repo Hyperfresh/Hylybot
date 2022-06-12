@@ -16,7 +16,7 @@ const userData = Bot.config.MC_DATA || null;
 export async function updateMinecraft(db: Db, user: string) {
     let value = userList[user];
     if (!value) {
-        let result = await db.collection("profiles").findOne({ user: user });
+        let result: any = await db.collection("profiles").findOne({ user: user });
         if (result.gametags.mc == null) {
             await db
                 .collection("profiles")
