@@ -21,7 +21,7 @@ const timezoneButton = new MessageActionRow().addComponents(
 
 export class TimeConvert {
     static async parseTime(time: string, tz?: string): Promise<DateTime> {
-        let conv: DateTime = null;
+        let conv: any = null
         let formats = ["t", "h:mma", "T", "Hmm"];
         console.log(`Attempting to parse time format ${time}...`);
         formats.forEach((item) => {
@@ -36,7 +36,7 @@ export class TimeConvert {
     }
 
     static async compareWorld(db: Db, time?: string, timezone?: string): Promise<MessageEmbed> {
-        let conv: DateTime = null;
+        let conv: any = null;
         let em = new MessageEmbed();
         if (time) {
             conv = await TimeConvert.parseTime(time, timezone).catch((err) => {
@@ -150,7 +150,7 @@ module.exports.run = {
         switch (interaction.options.getSubcommand()) {
             case "user":
                 await interaction.deferReply();
-                user = interaction.options.getUser("who");
+                user = interaction.options.getUser("who", true);
                 if (!user) user = interaction.user;
                 result = await db.collection("profiles").findOne({ user: user.id });
                 if (!result || result.timezone == null) {
@@ -170,7 +170,7 @@ module.exports.run = {
                     }\`)`
                 );
             case "timezone":
-                let value = interaction.options.getString("where");
+                let value = interaction.options.getString("where", true);
                 if (!timezone.tz.zone(value)) {
                     return interaction.reply({
                         content: `I don't recognize the time zone **tz \`${value}\`**. Please note that **tz** strings are case sensitive.`,
@@ -185,8 +185,8 @@ module.exports.run = {
                 );
             case "compare":
                 await interaction.deferReply();
-                user = interaction.options.getUser("who");
-                time = interaction.options.getInteger("time").toString();
+                user = interaction.options.getUser("who", true);
+                time = interaction.options.getInteger("time", true).toString();
                 try {
                     em = await TimeConvert.compareUser(user, db, time);
                 } catch (err) {

@@ -4,17 +4,17 @@ import { Bash } from "node-bash";
 import { PowerShell } from "node-powershell";
 import Bot from "../Bot";
 
-async function looseJsonParse(obj) {
+async function looseJsonParse(obj: any) {
     let test;
     try {
         test = await Function('"use strict";return (' + obj + ")")();
-    } catch (err) {
+    } catch (err: any) {
         test = err.stack;
     }
     return test;
 }
 
-async function executeShell(cmd) {
+async function executeShell(cmd: any) {
     const ps = new Bash({
         debug: true,
         executableOptions: {
@@ -54,7 +54,7 @@ async function update() {
     return result.raw;
 }
 
-async function executePwsh(cmd) {
+async function executePwsh(cmd: any) {
     const ps = new PowerShell({
         debug: true,
         executableOptions: {
@@ -123,7 +123,7 @@ module.exports.run = {
                 await interaction.deferReply({ ephemeral: true });
                 interaction.editReply(`\`\`\`ps\n${await update()}\`\`\``);
                 await interaction.followUp("🛑 > Shutting down after update. Please reboot manually.");
-                interaction.client.user.setStatus("invisible");
+                interaction.client.user?.setStatus("invisible");
                 setTimeout(() => {
                     interaction.client.destroy();
                     process.exit();
@@ -131,7 +131,7 @@ module.exports.run = {
                 break;
             case "stop":
                 await interaction.reply("🛑 > Shutting down.");
-                interaction.client.user.setStatus("invisible");
+                interaction.client.user?.setStatus("invisible");
                 setTimeout(() => {
                     interaction.client.destroy();
                     process.exit();

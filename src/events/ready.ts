@@ -17,11 +17,11 @@ import Bot from '../Bot';
 
 export default async function ready(dev: boolean) {
     if (dev) {
-        Bot.user.setActivity("⚠️ DEV MODE", { type: "PLAYING" });
-        Bot.user.setStatus("dnd");
+        Bot.user?.setActivity("⚠️ DEV MODE", { type: "PLAYING" });
+        Bot.user?.setStatus("dnd");
         console.warn("Developer Mode is active!");
         return;
     }
-    Bot.user.setActivity("for /", { type: "WATCHING" });
-    Bot.user.setStatus("online");
+    Bot.user?.setActivity("for /", { type: "WATCHING" });
+    Bot.user?.setStatus("online");
 }

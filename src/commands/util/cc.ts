@@ -38,7 +38,7 @@ module.exports.run = {
     async execute(interaction: CommandInteraction, db: Db) {
         await interaction.deferReply();
 
-        let search = await db.collection("currencies").findOne({ _id: object });
+        let search: any = await db.collection("currencies").findOne({ _id: object });
         if (
             Number(search.timestamp) + 86400000 <= DateTime.now().toMillis() ||
             search.timestamp == "undefined"
@@ -55,9 +55,9 @@ module.exports.run = {
             });
         }
 
-        let value = interaction.options.getNumber("value").toFixed(2);
+        let value = interaction.options.getNumber("value", true).toFixed(2);
         let convertFrom = interaction.options
-            .getString("convert_from")
+            .getString("convert_from", true)
             .toUpperCase();
         let convertTo = interaction.options.getString("convert_to");
         try {

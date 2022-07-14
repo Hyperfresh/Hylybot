@@ -15,7 +15,7 @@ async function dbSearch(
 
 export async function buttonBadge(interaction: ButtonInteraction, db: Db) {
     console.log(interaction);
-    let result = await dbSearch(db, interaction.user.id);
+    let result: any = await dbSearch(db, interaction.user.id);
     if (interaction.customId == "viewPride") {
         if (result.pride.length == 0) {
             interaction.editReply("You have no badges assigned.");
@@ -53,7 +53,7 @@ export async function buttonBadge(interaction: ButtonInteraction, db: Db) {
 }
 
 export async function clearGametag(interaction: ButtonInteraction, db: Db) {
-    let result = await dbSearch(db, interaction.user.id);
+    let result: any = await dbSearch(db, interaction.user.id);
     if (!result.gametags) {
         interaction.editReply("There are no gametags to clear!");
         return;
@@ -124,7 +124,7 @@ export async function setupProfile(interaction: ButtonInteraction, db: Db) {
 
     let assign: Array<string> = [];
 
-    let guildMember: GuildMember = await interaction.guild.members.fetch(
+    let guildMember: any = await interaction.guild?.members.fetch(
         interaction.user
     );
     let roles = guildMember.roles.cache;

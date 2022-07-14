@@ -34,7 +34,7 @@ if (!/^(v([1-9][6-9]+\.)?(\d+\.)?(\d+))$/.test(process.version)) {
  * @returns Configuration value.
  */
 export async function getDbConfig(str: string): Promise<any> {
-    let res = await Bot.db.collection("hybot").findOne({ item: str });
+    let res: any = await Bot.db.collection("hybot").findOne({ item: str });
     return res.value;
 }
 

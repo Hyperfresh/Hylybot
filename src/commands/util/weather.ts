@@ -18,9 +18,9 @@ const cooldownEmbed = new MessageEmbed()
         "https://media.discordapp.net/attachments/798903453438050324/931078218792980490/emoji.png"
     );
 
-function titleCase(str) {
+function titleCase(str: any) {
     str = str.toLowerCase().split(" ");
-    for (var i = 0; i < str.length; i++) {
+    for (let i = 0; i < str.length; i++) {
         str[i] = str[i].charAt(0).toUpperCase() + str[i].slice(1);
     }
     return str.join(" ");
@@ -98,7 +98,7 @@ async function returnWeatherEmbed(measure: string, location: string) {
         .then((data) => {
             console.log("Retrieved onecall data.", data);
             if (data.alerts) {
-                data.alerts.forEach((item) =>
+                data.alerts.forEach((item: any) =>
                     alerts.push(
                         new MessageEmbed()
                             .setAuthor({ name: "WEATHER ALERT" })
@@ -114,7 +114,7 @@ async function returnWeatherEmbed(measure: string, location: string) {
                 );
             }
             let forecast: Array<string> = [];
-            data.daily.forEach((item) => {
+            data.daily.forEach((item: any) => {
                 let thisDay = DateTime.fromSeconds(item.dt).toFormat("cccc d LLL");
                 forecast.push(
                     `**${thisDay}**: ${item.weather[0].description
@@ -227,7 +227,7 @@ module.exports.run = {
         }
 
         if (test == "user") {
-            let result: WithId<Document>;
+            let result: any;
             switch (interaction.options.getSubcommand()) {
                 case "view":
                     await interaction.deferReply();
@@ -239,7 +239,7 @@ module.exports.run = {
                         return;
                     }
                     lastRun = DateTime.now();
-                    let user: User = interaction.options.getUser("who");
+                    let user: User = interaction.options.getUser("who", true);
                     if (!interaction.options.getUser("who")) user = interaction.user;
                     result = await db.collection("weather").findOne({ user: user.id });
                     if (!result) {

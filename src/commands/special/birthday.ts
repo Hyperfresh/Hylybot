@@ -43,30 +43,18 @@ module.exports.run = {
         else bdayParse = `${bdayArray[0]} ${bdayArray[1]} ${now.year}`;
         let bday = DateTime.fromFormat(bdayParse, "d LLL yyyy");
         let length = bday.diff(now);
-        let birthday: string;
+        let birthday: string = ""
         console.log(bdayParse, bday, length);
         // Change the text depending how close the birthday is
         if (length.toMillis() <= 604800000) {
-            let remain: string;
-            if (length.toMillis() <= 86400000) {
-                remain = length.toFormat("h m");
-                let split: Array<string> = remain.split(" ");
-                birthday = `is in ${split[0]} hours and ${split[1]} minutes!`;
-            } else {
-                remain = length.toFormat("d h m");
-                let split: Array<string> = remain.split(" ");
-                birthday = `is in ${split[0]} days, ${split[1]} hours and ${split[2]} minutes!`;
-            }
+            birthday = `is <t:${bday.toSeconds()}:R>.`;
         }
         if (length.toMillis() < 0 && length.toMillis() >= -604800000) {
             let remain;
             if (length.toMillis() >= -86400000) {
                 birthday = `is today!`;
             } else {
-                remain = length.toFormat("d h m");
-                let split: Array<number> = remain.split(" ");
-                birthday = `was ${split[0] * -1} days, ${split[1] * -1} hours and ${split[2] * -1
-                    } minutes ago.`;
+                birthday = `was <t:${bday.toSeconds()}:R>.`;
             }
         }
         // Reply to interaction.

@@ -14,7 +14,7 @@ import {
 import { memoryUsage } from "process";
 import typescript from "typescript";
 
-async function aboutBot(client: Discord.Client) {
+async function aboutBot(client: any) {
     await client.user.fetch(true);
 
     let SUT = Duration.fromMillis(uptime() * 1000).toFormat("d h m s");
@@ -59,7 +59,7 @@ async function aboutBot(client: Discord.Client) {
     return aboutBotEmbed;
 }
 
-async function aboutServer(guild: Discord.Guild) {
+async function aboutServer(guild: any) {
     let aboutServerEmbed: Discord.MessageEmbed = new Discord.MessageEmbed()
         .setTitle(guild.name)
         .setThumbnail(guild.iconURL({ size: 1024 }))

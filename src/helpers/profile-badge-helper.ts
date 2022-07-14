@@ -19,7 +19,7 @@ export async function parseBadges(
     badges: Array<string>
 ) {
     let counter = 0;
-    let badgesToAdd = [];
+    let badgesToAdd: Array<string> = [];
     try {
         name.forEach((Element) => {
             if (badges.includes(Element)) {
@@ -37,7 +37,7 @@ export async function parseBadges(
 /**
  * Constructs badges and returns its length.
  */
-export async function construct(r, list: Array<string>) {
+export async function construct(r: any, list: Array<string>) {
     if (r == null) return ["No badges"];
     return list.filter(function (elem) {
         return r.indexOf(elem) > -1;
@@ -47,7 +47,7 @@ export async function construct(r, list: Array<string>) {
 /**
  * Spaces out an array.
  */
-export async function spaceout(args) {
+export async function spaceout(args: any) {
     let yes = "";
     if (/^(No)\s(\w+)\s(badges)$/.test(args[0])) return args[0];
     for (let value of args) {
@@ -80,10 +80,10 @@ export async function createServerBadges(
         "tada", // Giveaways
         "speech_left", // Splatulated Staff
     ];
-    let badgesToAdd = [];
-    let r = [];
+    let badgesToAdd: Array<string> = [];
+    let r: Array<any> = [];
 
-    let user: User = client.users.cache.get(user_id);
+    let user: User = await client.users.fetch(user_id);
     let guildMember: GuildMember = await guild.members.fetch(user);
     let roles = guildMember.roles.cache;
 
@@ -113,7 +113,7 @@ export async function createServerBadges(
 /**
  * Creates pride badges.
  */
-export async function createPrideBadges(r) {
+export async function createPrideBadges(r: any) {
     if (r === null) return "No pride badges";
 
     // Create pride badges for embeds & database.
@@ -216,10 +216,10 @@ export async function createInterestBadges(
         ":desktop:",
     ];
 
-    let badgesToAdd = [];
-    let r = [];
+    let badgesToAdd: Array<string> = [];
+    let r: Array<any> = [];
 
-    let user: User = client.users.cache.get(user_id);
+    let user: User = await client.users.fetch(user_id);
     let guildMember: GuildMember = await guild.members.fetch(user);
     let roles = guildMember.roles.cache;
 
