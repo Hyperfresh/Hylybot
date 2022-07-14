@@ -1,0 +1,28 @@
+{
+  "name": "hylybot-next",
+  "version": "1.0.0",
+  "description": "The next custom Discord bot",
+  "main": "index.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+
+    "prestart": "tsc",
+    "start": "node ./build/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Hyperfresh/Hylybot.git"
+  },
+  "author": "Hyla A",
+  "license": "AGPL-3.0",
+  "bugs": {
+    "url": "https://github.com/Hyperfresh/Hylybot/issues"
+  },
+  "homepage": "https://github.com/Hyperfresh/Hylybot#readme",
+  "dependencies": {
+    "@types/luxon": "^2.3.2",
+    "discord.js": "^13.8.1",
+    "dotenv": "^16.0.1",
+    "luxon": "^3.0.1"
+  }
+}
