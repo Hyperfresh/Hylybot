@@ -8,9 +8,8 @@ import { Routes } from "discord-api-types/v9";
 import StarboardManager, { Starboard, StarboardDefaultCreateOptions } from "discord-starboards";
 
 export default new class Bot extends Client {
-    public config: any;
-    public db: Db;
-    private static db: Db;
+    public config: any = fs.readFile("./data/config.jsonc", (file: any) => {jsonc.parse(file)});
+    public db: any = MongoClient.connect(this.config.MONGO_URL, (db: any) => {db.db(this.config.MONGO_DBNAME)})
 
     public commands: Collection<any, any> = new Collection();
     private commandsToPush: any[] = [];
@@ -18,7 +17,7 @@ export default new class Bot extends Client {
     private StarboardsManagerCustomDb = class extends StarboardManager {
         public async getAllStarboards(): Promise<any> {
             console.log("Grabbing starboard database...");
-            return Bot.db.collection("starboard").find().toArray();
+            return this.db.collection("starboard").find().toArray();
         }
         public async saveStarboard(data: Starboard): Promise<boolean | void> {
             await Bot.db.collection("starboard").insertOne(data);
@@ -70,15 +69,12 @@ export default new class Bot extends Client {
         });
         console.log('info: commmands initialized');
 
-        let mongod = await MongoClient.connect(this.config.MONGO_URL);
-        this.db = mongod.db(this.config.MONGO_DBNAME);
-        Bot.db = this.db;
         console.log('info: database connected');
 
         this.starboardManager = new this.StarboardsManagerCustomDb(this, { storage: false });
         console.log('info: starboard initialized');
 
-        this.starboardManager.on("starboardNoEmptyMsg", (emoji, message, user) => {
+        this.starboardManager.on("starboardNoEmptyMsg", (_emoji: any, message: any, user: any) => {
             message.channel.send(`<@${user.id}>, this message seems to have no content. What's the point in starring that?`);
         });
     }
@@ -107,7 +103,7 @@ export default new class Bot extends Client {
         await this.login(token);
 
         this.on("shardReady", async () => {
-            console.log(`✅ > ${this.user.username} is ready for action!`);
+            console.log(`✅ > ${this.user?.username} is ready for action!`);
             await ready(this.config.DEV_MODE);
 
             await this.pushCommands();
