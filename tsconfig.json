@@ -2,8 +2,11 @@
   "compilerOptions": {
     "target": "ES6",
     "module": "commonjs",
-    "outDir": "build",
+    "outDir": "./build",
+    "sourceRoot": "./src",
+    "esModuleInterop": true,
     "strict": true,
-    "sourceMap": true
+    "sourceMap": true,
+    "removeComments": true
   }
 }
