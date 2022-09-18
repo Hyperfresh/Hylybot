@@ -1,4 +1,9 @@
-import Bot from './Bot';
+import { REST } from "@discordjs/rest";
+import { ActivityType, Client, Collection, GatewayIntentBits, InteractionType } from "discord.js";
+import { config } from "dotenv";
+import { env } from "process";
+import { Routes } from "discord-api-types/v9";
+import importCommands from "./helpers/core/importHelper";
 
 var copy = String(`
 Hylybot - the custom-built Discord bot for the Hyla + Friends server.
@@ -16,70 +21,61 @@ See the GNU Affero General Public License for more details.
 
 You should have received a copy of the GNU Affero General Public License
 along with this program. If not, see <https://www.gnu.org/licenses/>.
-`);
+`;
 
-console.log(copy);
+console.log(logo, credits);
 
-if (!/^(v([1-9][6-9]+\.)?(\d+\.)?(\d+))$/.test(process.version)) {
-    throw new Error(
-        `Hylybot and its key repository Discord.js requires Node v16.x or higher to run. You have v${process.version}.\nPlease upgrade your Node installation.`
-    );
-}
+// Check env variables...
+const TOKEN: string = env.BOT_TOKEN ? env.BOT_TOKEN : "";
+const CLIENT: string = env.CLIENT_ID ? env.CLIENT_ID : "";
+const GUILD: string = env.GUILD_ID ? env.GUILD_ID : "";
 
+if ([TOKEN, CLIENT, GUILD].includes(""))
+  throw new Error("One of your environment variables are missing.");
 
+// Create bot object.
+const bot: Client = new Client({
+  intents: [
+    GatewayIntentBits.Guilds,
+    GatewayIntentBits.GuildMessages,
+    GatewayIntentBits.GuildVoiceStates,
+    GatewayIntentBits.GuildMessageReactions
+  ],
+});
 
-/**
- * Retrieve a configuration value stored on Hylybot's MongoDB database.
- * @param str Value to retrieve.
- * @returns Configuration value.
- */
-export async function getDbConfig(str: string): Promise<any> {
-    let res: any = await Bot.db.collection("hybot").findOne({ item: str });
-    return res.value;
-}
+// Load commands from directories and into memory.
+const commandList: Collection<any, any> = new Collection();
+const commandJsonList: Array<JSON> = importCommands(commandList)
 
-Bot.on("interactionCreate", async (interaction) => {
-    if (Bot.config.DEV_MODE && !Bot.config.OWNER_ID.includes(interaction.user.id)) return;
+bot.on("shardReady", async () => {
+  // Push commands into a JSON file.
+  console.log("ℹ️ > Pushing commands to Discord...");
+  const rest = new REST({ version: "9" }).setToken(TOKEN);
+  await rest
+    .put(Routes.applicationGuildCommands(CLIENT, GUILD), {
+      body: commandJsonList,
+    })
+    .then(() => {
+      console.log(`📮 > Commands pushed.`);
+    })
+    .catch((err) => {
+      throw err;
+    });
 
-    if (interaction.isButton()) {
-        let profileButtonID = [
-            "viewPride",
-            "gay",
-            "les",
-            "bi",
-            "pan",
-            "ace",
-            "aro",
-            "trans",
-            "enby",
-            "agender",
-            "gq",
-            "catgender",
-            "ally",
-            "nd",
-            "furry",
-            "clearPride",
-            "clearGenshin",
-            "clearFC",
-            "clearMC",
-            "clearFortnite",
-            "clearTag",
-            "create",
-        ];
-        if (
-            interaction.customId == "preCol" ||
-            interaction.customId == "reassign"
-        ) {
-            let command = Bot.commands.get("role");
-            command.run.execute(interaction, Bot.db);
-        }
-        if (profileButtonID.includes(interaction.customId)) {
-            let command = Bot.commands.get("profile");
-            command.run.execute(interaction, Bot.db);
-        }
+    console.log(`✅ > ${bot.user?.tag} is now online.`)
+    if (env.DEV_MODE) {
+        bot.user?.setPresence({activities: [{name: "to Hyla's commands 🔧 ", type: ActivityType.Listening}], status: "dnd"})
+        console.warn(`⚠️ > Developer Mode is active. I will only respond to commands from the owners listed in your .env file.`)
+    } else {
+        bot.user?.setPresence({activities: [{name: "for /", type: ActivityType.Watching}], status: "online"})
     }
-    if (interaction.isCommand()) {
-        const command = Bot.commands.get(interaction.commandName);
+});
+
+bot.on("interactionCreate", async (interaction) => {
+    if (env.DEV_MODE && !env.OWNERS?.includes(interaction.user.id)) return
+
+    if (interaction.type === InteractionType.ApplicationCommand) {
+        const command = commandList.get(interaction.commandName);
         if (!command) return;
 
         try {
