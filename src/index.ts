@@ -21,9 +21,9 @@ See the GNU Affero General Public License for more details.
 
 You should have received a copy of the GNU Affero General Public License
 along with this program. If not, see <https://www.gnu.org/licenses/>.
-`;
+`);
 
-console.log(logo, credits);
+console.log(copy);
 
 // Check env variables...
 const TOKEN: string = env.BOT_TOKEN ? env.BOT_TOKEN : "";
@@ -79,7 +79,7 @@ bot.on("interactionCreate", async (interaction) => {
         if (!command) return;
 
         try {
-            command.run.execute(interaction, Bot.db);
+            command.run.execute(interaction);
         } catch (error) {
             console.error(error);
             interaction.reply({
@@ -97,22 +97,3 @@ bot.on("interactionCreate", async (interaction) => {
 //     message.channel.send(`<@!${user.id}>, the starboard is locked. New stars cannot be added to this message.`)
 //   }
 // })
-
-// Check if it's someone's birthday, and send a message at midday UTC time
-import birthdayCheck from "./loops/birthdayCheck";
-setInterval(async () => {
-    await birthdayCheck(Bot.db, Bot);
-}, 3600000);
-
-import streamCheck from "./loops/streamCheck";
-setInterval(async () => {
-    await streamCheck(Bot.db, Bot);
-}, 60000);
-
-// import OzAlertFetch from "./loops/ozalert"
-// setInterval(async () => await OzAlertFetch(bot), 60000)
-import fs from 'fs';
-import { jsonc } from 'jsonc';
-let configData = fs.readFileSync("./data/config.jsonc", "utf8");
-let config = jsonc.parse(configData);
-Bot.start(config.BOT_TOKEN);
